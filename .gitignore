@@ -1,0 +1,11 @@
+# data/*
+# figures/*
+# **/*.npy
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*/__init__.py
+
+# Jupyter Notebook
+*.ipynb
+*.ipynb_checkpoints
