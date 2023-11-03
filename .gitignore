@@ -1,6 +1,5 @@
-# data/*
-# figures/*
-# **/*.npy
+**/*.amc
+**/*.asf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
