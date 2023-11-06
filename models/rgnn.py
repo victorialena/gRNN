@@ -57,3 +57,17 @@ class GCRU(nn.Module):
             outputs.append(h_prev)
         
         return torch.stack(outputs, dim=2), h_prev
+    
+
+class rGNN(nn.Module):
+    def __init__(self, dimensions:list[int]):
+        self.layer1 = GCRU(dimensions[0], dimensions[1])
+        self.layer2 = GCRU(dimensions[1], dimensions[2])
+
+    def forward(self, x, edge_index):
+        bs, N, T, d = x.shape
+
+        # note: no need for activation since the GRU cell has tanh activation
+        out, hidden = self.layer1(x, edge_index)
+        out, _ = self.layer2(out, edge_index, hidden)
+        return out[:, :, -1]

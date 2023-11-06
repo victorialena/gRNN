@@ -15,3 +15,4 @@ def off_diag_index(n):
 
 def normalize(data, data_max, data_min):
     return (data - data_min) * 2 / (data_max - data_min) - 1
+

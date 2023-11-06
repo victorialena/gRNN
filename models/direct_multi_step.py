@@ -1,17 +1,29 @@
 import torch.nn as nn
-import torch_geometric.nn as gnn
+
+from models.baselines import lstmBaseline, mlpBaseline
+from models.rgnn import rGNN
 
 
-class GNNembedding(nn.Module):
-    """
-    Note: self-loops are not necessary since we included them in the graph, but for good measure/std practice
-    """
-    def __init__(self, input_dim, output_dim=128):
-        super().__init__()
-        self.model = gnn.Sequential('x, edge_index', [
-            (gnn.GraphSAGE(input_dim, output_dim, num_layers=1, act='relu', dropout=0.0), 'x, edge_index -> x'),
-        ])
+def get_model(name, **kwargs):
+    if name=='rgnn':
+        return rGNN(*kwargs)
+    if name=='mlp':
+        return mlpBaseline(*kwargs)
+    if name=='lstm':
+        return lstmBaseline(*kwargs)
     
-    def forward(self, x, edge_index):
-        return self.model(x, edge_index)
 
+class DirectMultiStepModel(nn.Module):
+    def __init__(self, model, output_dim, precition_horizon):
+        super(DirectMultiStepModel, self).__init__()
+        
+        self.precition_horizon = precition_horizon
+        
+        self.model = model
+        self.fc = nn.Linear(model.dims[-1], output_dim*precition_horizon)
+        
+    def forward(self, x, edge_index):
+        bs, N, T, d = x.shape
+        out = self.model(x, edge_index=edge_index)
+        out = self.fc(out)
+        return out.reshape(bs, N, self.precition_horizon, -1)

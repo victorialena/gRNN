@@ -1,7 +1,7 @@
+import pdb
 import torch
 import torch.nn as nn
 
-from torch.nn import Linear, Parameter
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import add_self_loops, degree
 
@@ -12,28 +12,28 @@ class GlstmConv(MessagePassing):
         
         self.add_self_loops = add_self_loops
         
-        # self.lin = Linear(in_channels, out_channels, bias=False)
         self.lstm = nn.LSTM(input_size=in_channels, hidden_size=out_channels, num_layers=1, 
-                         bias=False, batch_first=False, dropout=0.0)
-        self.bias = Parameter(torch.empty(out_channels))
-
+                            bias=False, batch_first=True, dropout=0.0)
+        self.bias = nn.Parameter(torch.empty(out_channels))
         self.reset_parameters()
 
     def reset_parameters(self):
-        # self.lin.reset_parameters()
         self.lstm.reset_parameters()
         self.bias.data.zero_()
 
     def forward(self, x, edge_index, h0=None):
+        # bs, N, T, d = x.shape
         # x has shape [N, in_channels]
         # edge_index has shape [2, E]
+
+        pdb.set_trace()
 
         # Step 1: Add self-loops to the adjacency matrix.
         if self.add_self_loops:
             edge_index, _ = add_self_loops(edge_index, num_nodes=x.size(1))
 
         # Step 2: Linearly transform node feature matrix.
-        x, h0 = self.lstm(x, h0)
+        x, h0 = self.lstm(x.view(), h0)
 
         # Step 3: Compute normalization.
         row, col = edge_index
@@ -52,3 +52,16 @@ class GlstmConv(MessagePassing):
 
         # Step 4: Normalize node features.
         return norm.view(-1, 1) * x_j
+    
+
+class gRNN(nn.Module):
+    def __init__(self, dimensions:list[int]):
+        self.layer1 = GlstmConv(dimensions[0], dimensions[1])
+        self.layer2 = GlstmConv(dimensions[1], dimensions[2])
+
+    def forward(self, x, edge_index):
+        bs, N, T, d = x.shape
+
+        out, hidden = self.layer1(x, edge_index).relu()
+        out, _ = self.layer2(out, edge_index, hidden)
+        return out[:, :, -1]

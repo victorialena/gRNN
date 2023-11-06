@@ -10,8 +10,8 @@ from torch.utils.data import DataLoader
 from tqdm import trange
 
 from utils import *
-from models.rgnn import GCRU
 from metrics import MetricSuite
+from models.direct_multi_step import get_model, DirectMultiStepModel
 from data.motion.prepare_dataset import prepare_dataset
 
 DATA_PATH = 'data/motion_35'
@@ -19,9 +19,11 @@ DATA_PATH = 'data/motion_35'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
-parser.add_argument('--num_epoch', type=int, default=150, help='Number of epochs to train.')
+parser.add_argument('--model', type=str, default='rgnn', help='Model type to be used.', choices=['rgnn', 'mlp', 'lstm'])
+parser.add_argument('--num_epoch', type=int, default=200, help='Number of epochs to train.')
+parser.add_argument('--precition_horizon', type=int, default=10)
 parser.add_argument('--batch_size', type=int, default=128, help='Number of samples per batch.')
-parser.add_argument('--learning_rate', type=float, default=0.0005, help='Initial learning rate.')
+parser.add_argument('--learning_rate', type=float, default=0.001, help='Initial learning rate.')
 parser.add_argument('--no_cuda', action='store_true', default=False, help='Disables CUDA training.')
 parser.add_argument('--normalize', action='store_true', default=False, help='Apply feature scaling to input data.')
 
@@ -40,7 +42,7 @@ def train(model, data_loader, optimizer, loss_fn, num_epoch):
         for X, edges in data_loader:
             if args.cuda:
                 X, edges = X.cuda(), edges.cuda()
-            x, y = X[:, :, :-model.precition_horizon], X[:, :, -model.precition_horizon:]
+            x, y = X[:, :, :-model.precition_horizon], X[:, :, -model.precition_horizon:, :3]
             yhat = model(x, edges[0])
 
             optimizer.zero_grad()
@@ -60,39 +62,24 @@ def evaluate(model, data_loader, metrics):
     
     Y, Yhat = [], []
     with torch.no_grad():
-        for x, y, edges in data_loader:
-            x, y, edges = x.squeeze(0), y.squeeze(0), edges.squeeze(0)
-            Yhat.append(model(x, edges))
+        for X, edges in data_loader:
+            if args.cuda:
+                X, edges = X.cuda(), edges.cuda()
+            x, y = X[:, :, :-model.precition_horizon], X[:, :, -model.precition_horizon:, :3]
+            Yhat.append(model(x, edges[0]))
             Y.append(y)
 
-    Y, Yhat = torch.stack(Y, axis=0), torch.stack(Yhat, axis=0)
+    Y, Yhat = torch.cat(Y, dim=0), torch.cat(Yhat, dim=0)
     return metrics(Yhat, Y)
-
-
-class DirectMultiStepModel(nn.Module):
-    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=32):
-        super(DirectMultiStepModel, self).__init__()
-        
-        self.precition_horizon = precition_horizon
-        self.output_dim = output_dim
-        
-        # self.emb = GNNembedding(input_dim, hidden_dim)
-        self.layer1 = GCRU(input_dim, hidden_dim)
-        self.layer2 = GCRU(hidden_dim, hidden_dim)
-        self.fc = nn.Linear(hidden_dim, output_dim*precition_horizon)
-        
-    def forward(self, x, edge_index):
-        # out = self.emb(x, edge_index)
-        out, hidden = self.layer1(x, edge_index)
-        out, _ = self.layer2(out, edge_index, hidden)
-        out = self.fc(out[-1]).relu()
-        return out.reshape(-1, self.precition_horizon, self.output_dim).swapdims(0, 1)
 
 
 seedall(args.seed, args.cuda)
 train_loader, valid_loader, test_loader, scaling = prepare_dataset(args)
 
-model = DirectMultiStepModel(input_dim=6, output_dim=3, precition_horizon=10, hidden_dim=64).to(device)
+input_dim, hidden_dim, output_dim = 6, 64, 3
+net = get_model(args.model, dimensions=[input_dim, hidden_dim, hidden_dim])
+
+model = DirectMultiStepModel(net, precition_horizon=args.precition_horizon, output_dim=output_dim).to(device)
 optimizer = Adam(model.parameters(), lr=args.learning_rate)
 
 loss_fn = nn.MSELoss()
@@ -100,3 +87,4 @@ metrics = MetricSuite()
 
 model, loss = train(model, train_loader, optimizer, loss_fn, args.num_epoch)
 direct_metrics = evaluate(model, test_loader, metrics)
+print(direct_metrics)

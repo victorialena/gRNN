@@ -55,7 +55,7 @@ def prepare_dataset(args):
     # Convert to pytorch cuda tensor.
     dataset = TensorDataset(torch.Tensor(all_feats).swapaxes(1, 2), torch.tensor(all_edges).repeat(all_feats.shape[0], 1, 1))
 
-    train_size = int(len(dataset) * 0.8)
+    train_size = int(len(dataset) * 0.7)
     val_size = int(len(dataset) * 0.1)
     test_size = len(dataset) - train_size - val_size
     
