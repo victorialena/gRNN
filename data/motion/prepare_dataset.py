@@ -73,5 +73,5 @@ def prepare_dataset(args):
     val_generator = DataLoader(val_dataset, **params)
     test_generator = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
 
-    return train_generator, val_generator, test_generator, scaling
+    return train_generator, val_generator, test_generator, scaling, (args.batch_size, NUM_JOINTS, MAX_STEPS, all_feats.shape[-1])
     

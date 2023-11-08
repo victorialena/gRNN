@@ -5,6 +5,8 @@ import torch.nn as nn
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import add_self_loops, degree
 
+from typing import Union, List
+
 
 class GlstmConv(MessagePassing):
     def __init__(self, in_channels, out_channels, add_self_loops: bool = True):
@@ -55,7 +57,10 @@ class GlstmConv(MessagePassing):
     
 
 class gRNN(nn.Module):
-    def __init__(self, dimensions:list[int]):
+    def __init__(self, dimensions:List[int], **kwargs):
+        super().__init__()
+        self.dimensions = dimensions
+
         self.layer1 = GlstmConv(dimensions[0], dimensions[1])
         self.layer2 = GlstmConv(dimensions[1], dimensions[2])
 
@@ -65,3 +70,6 @@ class gRNN(nn.Module):
         out, hidden = self.layer1(x, edge_index).relu()
         out, _ = self.layer2(out, edge_index, hidden)
         return out[:, :, -1]
+    
+    def dims(self):
+        return self.dimensions

@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 import torch_geometric.nn as gnn
 
+from typing import Union, List
+
 
 class GCRUCell(nn.Module):
     """
@@ -60,7 +62,10 @@ class GCRU(nn.Module):
     
 
 class rGNN(nn.Module):
-    def __init__(self, dimensions:list[int]):
+    def __init__(self, dimensions:List[int], **kwargs):
+        super().__init__()
+        self.dimensions = dimensions
+
         self.layer1 = GCRU(dimensions[0], dimensions[1])
         self.layer2 = GCRU(dimensions[1], dimensions[2])
 
@@ -71,3 +76,6 @@ class rGNN(nn.Module):
         out, hidden = self.layer1(x, edge_index)
         out, _ = self.layer2(out, edge_index, hidden)
         return out[:, :, -1]
+    
+    def dims(self):
+        return self.dimensions

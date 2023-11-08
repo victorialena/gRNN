@@ -19,13 +19,14 @@ DATA_PATH = 'data/motion_35'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
-parser.add_argument('--model', type=str, default='rgnn', help='Model type to be used.', choices=['rgnn', 'mlp', 'lstm'])
+parser.add_argument('--model', type=str, default='rgnn', help='Model type to be used.', choices=['rgnn', 'mlp', 'lstm', 'rnn2gnn', 'gnn2rnn'])
 parser.add_argument('--num_epoch', type=int, default=200, help='Number of epochs to train.')
 parser.add_argument('--precition_horizon', type=int, default=10)
 parser.add_argument('--batch_size', type=int, default=128, help='Number of samples per batch.')
 parser.add_argument('--learning_rate', type=float, default=0.001, help='Initial learning rate.')
 parser.add_argument('--no_cuda', action='store_true', default=False, help='Disables CUDA training.')
 parser.add_argument('--normalize', action='store_true', default=False, help='Apply feature scaling to input data.')
+parser.add_argument('--hidden_dim', nargs='+', type=int, default=[64, 64], help='List of hidden dimensions for each layer.')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -74,10 +75,11 @@ def evaluate(model, data_loader, metrics):
 
 
 seedall(args.seed, args.cuda)
-train_loader, valid_loader, test_loader, scaling = prepare_dataset(args)
+train_loader, valid_loader, test_loader, scaling, size = prepare_dataset(args)
 
-input_dim, hidden_dim, output_dim = 6, 64, 3
-net = get_model(args.model, dimensions=[input_dim, hidden_dim, hidden_dim])
+_, num_nodes, horizon, input_dim = size
+output_dim = 3
+net = get_model(args.model, dimensions=[input_dim]+args.hidden_dim, history=horizon-args.precition_horizon)
 
 model = DirectMultiStepModel(net, precition_horizon=args.precition_horizon, output_dim=output_dim).to(device)
 optimizer = Adam(model.parameters(), lr=args.learning_rate)
