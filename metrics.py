@@ -36,3 +36,7 @@ class MetricSuite():
     def __call__(self, pred, target):
         out = {k: fn(pred, target) for k, fn in self.mdict.items()}
         return out
+    
+def print_metrics(metrics: dict):
+    res = [k+": "+str(v.item()) for k, v in metrics.items()]
+    print(" | ".join(res))

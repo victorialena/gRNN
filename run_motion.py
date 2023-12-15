@@ -5,15 +5,15 @@ import torch
 import torch.nn as nn
 
 from torch.optim import Adam
-from torch.utils.data import DataLoader
+# from torch.utils.data import DataLoader
 
 from tqdm import trange
 
 from utils import *
-from metrics import MetricSuite
+from metrics import MetricSuite, print_metrics
 from models.direct_multi_step import get_model, DirectMultiStepModel
-from data.motion.prepare_dataset import prepare_dataset
 
+from data.motion.prepare_dataset import prepare_dataset
 DATA_PATH = 'data/motion_35'
 
 
@@ -25,19 +25,22 @@ parser.add_argument('--precition_horizon', type=int, default=10)
 parser.add_argument('--batch_size', type=int, default=128, help='Number of samples per batch.')
 parser.add_argument('--learning_rate', type=float, default=0.001, help='Initial learning rate.')
 parser.add_argument('--no_cuda', action='store_true', default=False, help='Disables CUDA training.')
-parser.add_argument('--normalize', action='store_true', default=False, help='Apply feature scaling to input data.')
+parser.add_argument('--normalize', action='store_true', default=True, help='Apply feature scaling to input data.')
 parser.add_argument('--hidden_dim', nargs='+', type=int, default=[64, 64], help='List of hidden dimensions for each layer.')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(args)
 
 
 def train(model, data_loader, optimizer, loss_fn, num_epoch):
     model.train()
+    print("Training...")
     
     ep_loss = []
-    for _ in trange(num_epoch, unit="Epoch"):
+    #for _ in trange(num_epoch, unit="Epoch"):
+    for _ in range(num_epoch):
         losses = []
         
         for X, edges in data_loader:
@@ -60,6 +63,7 @@ def train(model, data_loader, optimizer, loss_fn, num_epoch):
 
 def evaluate(model, data_loader, metrics):
     model.eval()
+    print("Testing...")
     
     Y, Yhat = [], []
     with torch.no_grad():
@@ -89,4 +93,4 @@ metrics = MetricSuite()
 
 model, loss = train(model, train_loader, optimizer, loss_fn, args.num_epoch)
 direct_metrics = evaluate(model, test_loader, metrics)
-print(direct_metrics)
+print_metrics(direct_metrics)
