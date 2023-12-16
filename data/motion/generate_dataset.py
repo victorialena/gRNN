@@ -119,6 +119,7 @@ if __name__ == '__main__':
     features = []
     edges = []
     labels = []
+    graphs = []
 
     for label in os.listdir(root):
         data_path = os.path.join(root, label)
@@ -131,7 +132,12 @@ if __name__ == '__main__':
             features.append(np.concatenate((train_loc, train_vel), axis=-1))
             edges.extend([graph]*num_examples)
             labels.extend([label]*num_examples)
+            graphs.append(graph)
             print(train_loc.shape)
+    
+
+    res = [(graphs[0] == graphs[i]).all() for i in range(len(graphs))]
+    pdb.set_trace()
     
     np.save(out_path + 'features.npy', np.concatenate(features, axis=0))
     np.save(out_path + 'edges.npy', edges)

@@ -55,27 +55,29 @@ class GCRU(nn.Module):
         # x is expected to be of shape (seq_len, batch, input_size)
         outputs = []
         for t in range(x.size(2)):
-            h_prev = self.gru_cell(x[:, :, t], edge_index, h_prev)
+            h_prev = self.gru_cell(x[:, :, t], edge_index[0], h_prev)
             outputs.append(h_prev)
         
         return torch.stack(outputs, dim=2), h_prev
     
 
 class rGNN(nn.Module):
-    def __init__(self, dimensions:List[int], **kwargs):
+    def __init__(self, dimensions:List[int], num_nodes, **kwargs):
         super().__init__()
         self.dimensions = dimensions
+        self.num_nodes = num_nodes
 
         self.layer1 = GCRU(dimensions[0], dimensions[1])
-        self.layer2 = GCRU(dimensions[1], dimensions[2])
+        self.linear = nn.Linear(dimensions[1]*num_nodes, dimensions[2])
+        self.activation = nn.Softmax()
 
     def forward(self, x, edge_index):
         bs, N, T, d = x.shape
 
         # note: no need for activation since the GRU cell has tanh activation
         out, hidden = self.layer1(x, edge_index)
-        out, _ = self.layer2(out, edge_index, hidden)
-        return out[:, :, -1]
+        logits = self.linear(hidden.reshape(bs, -1))
+        return self.activation(logits)
     
     def dims(self):
         return self.dimensions

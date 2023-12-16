@@ -11,11 +11,6 @@ DATA_PATH = '/home/victorialena/mocap/dataset/'
 MAX_STEPS = 120
 NUM_JOINTS = 31
 
-def one_hot(labels):
-    unique, inverse = np.unique(labels, return_inverse=True)
-    onehot = np.eye(unique.shape[0])[inverse]
-    return onehot
-
 
 def prepare_dataset(args):
     # Load data
@@ -46,7 +41,8 @@ def prepare_dataset(args):
         features[..., 2] = normalize(features[..., 2], z_max, z_min)
 
     # Convert to pytorch cuda tensor.
-    dataset = TensorDataset(torch.Tensor(features).swapaxes(1, 2), torch.tensor(edges, dtype=int), torch.tensor(one_hot(labels), dtype=int))
+    _, inverse = np.unique(labels, return_inverse=True)
+    dataset = TensorDataset(torch.Tensor(features).swapaxes(1, 2), torch.tensor(edges, dtype=int), torch.tensor(inverse, dtype=int))
 
     train_size = int(len(dataset) * 0.8)
     val_size = int(len(dataset) * 0.1)

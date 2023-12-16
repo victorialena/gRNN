@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import add_self_loops, degree
 
-from typing import Union, List
+from typing import List
 
 
 class GlstmConv(MessagePassing):
@@ -27,8 +27,6 @@ class GlstmConv(MessagePassing):
         # bs, N, T, d = x.shape
         # x has shape [N, in_channels]
         # edge_index has shape [2, E]
-
-        pdb.set_trace()
 
         # Step 1: Add self-loops to the adjacency matrix.
         if self.add_self_loops:
@@ -57,19 +55,22 @@ class GlstmConv(MessagePassing):
     
 
 class gRNN(nn.Module):
-    def __init__(self, dimensions:List[int], **kwargs):
+    def __init__(self, dimensions:List[int], num_nodes:int, **kwargs):
         super().__init__()
         self.dimensions = dimensions
 
         self.layer1 = GlstmConv(dimensions[0], dimensions[1])
         self.layer2 = GlstmConv(dimensions[1], dimensions[2])
+        self.linear = nn.Linear(dimensions[2]*num_nodes, dimensions[3])
+        self.activation = nn.Softmax()
 
     def forward(self, x, edge_index):
-        bs, N, T, d = x.shape
+        bs, N, T, _ = x.shape
 
         out, hidden = self.layer1(x, edge_index).relu()
         out, _ = self.layer2(out, edge_index, hidden)
-        return out[:, :, -1]
-    
+        out = self.linear(out[:, :, -1].reshape(bs, -1))
+        return self.activation(out)
+
     def dims(self):
         return self.dimensions
