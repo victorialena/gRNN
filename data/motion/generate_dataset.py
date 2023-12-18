@@ -121,8 +121,10 @@ if __name__ == '__main__':
     labels = []
     graphs = []
 
-    for label in os.listdir(root):
+    for label in sorted(os.listdir(root)):
         data_path = os.path.join(root, label)
+
+        label = label.split('_')[0]
         if os.path.isdir(data_path) and valid_dir(data_path):
             print('loading ', data_path)
             all_np_motion, joint_masks, graph = process_all_amc_file(data_path)
@@ -136,8 +138,7 @@ if __name__ == '__main__':
             print(train_loc.shape)
     
 
-    res = [(graphs[0] == graphs[i]).all() for i in range(len(graphs))]
-    pdb.set_trace()
+    assert all([graphs[0] == graphs[i] for i in range(len(graphs))]), "Graphs deviate for different data sources!"
     
     np.save(out_path + 'features.npy', np.concatenate(features, axis=0))
     np.save(out_path + 'edges.npy', edges)

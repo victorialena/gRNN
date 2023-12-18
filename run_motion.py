@@ -14,13 +14,14 @@ from metrics import MetricSuite, print_metrics
 from models.direct_multi_step import get_model, DirectMultiStepModel
 
 from data.motion.prepare_dataset import prepare_dataset
-DATA_PATH = 'data/motion_35'
+
+NUM_CLASSES = 5
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
-parser.add_argument('--model', type=str, default='rgnn', help='Model type to be used.', choices=['rgnn', 'mlp', 'lstm', 'rnn2gnn', 'gnn2rnn'])
-parser.add_argument('--num_epoch', type=int, default=20, help='Number of epochs to train.')
+parser.add_argument('--model', type=str, default='rgnn', help='Model type to be used.', choices=['rgnn', 'grnn', 'mlp', 'lstm', 'rnn2gnn', 'gnn2rnn'])
+parser.add_argument('--num_epoch', type=int, default=100, help='Number of epochs to train.')
 parser.add_argument('--precition_horizon', type=int, default=0)
 parser.add_argument('--batch_size', type=int, default=128, help='Number of samples per batch.')
 parser.add_argument('--learning_rate', type=float, default=0.001, help='Initial learning rate.')
@@ -39,7 +40,6 @@ def train(model, data_loader, optimizer, loss_fn, num_epoch):
     print("Training...")
     
     ep_loss = []
-    #for _ in trange(num_epoch, unit="Epoch"):
     for _ in range(num_epoch):
         losses = []
         
@@ -54,7 +54,7 @@ def train(model, data_loader, optimizer, loss_fn, num_epoch):
             optimizer.step()
             
             losses.append(loss.item())
-        print('CEloss:', np.mean(losses))
+        # print('CEloss:', np.mean(losses))
         
         ep_loss.append(np.mean(losses))
     return model, ep_loss
@@ -79,16 +79,15 @@ seedall(args.seed, args.cuda)
 train_loader, valid_loader, test_loader, scaling, size = prepare_dataset(args)
 
 _, num_nodes, horizon, input_dim = size
-output_dim = 4
 
-model = get_model(args.model, dimensions=[input_dim]+args.hidden_dim+[output_dim], 
+model = get_model(args.model, dimensions=[input_dim]+args.hidden_dim+[NUM_CLASSES], 
                   history=horizon-args.precition_horizon,
                   num_nodes=num_nodes)
 model.to(device)
 optimizer = Adam(model.parameters(), lr=args.learning_rate)
 
 loss_fn = nn.CrossEntropyLoss()
-metrics = MetricSuite(mode='classification', num_classes=output_dim, device=device)
+metrics = MetricSuite(mode='classification', num_classes=NUM_CLASSES, device=device)
 
 model, loss = train(model, train_loader, optimizer, loss_fn, args.num_epoch)
 direct_metrics = evaluate(model, test_loader, metrics)
