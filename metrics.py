@@ -80,7 +80,6 @@ class mREC(nn.Module):
 
     def __call__(self, pred, target, mask):
         return self.fn((pred>0).to(int).cpu(), mask.to(int).cpu())
-    
 
 
 class MetricSuite():
@@ -99,17 +98,18 @@ class MetricSuite():
                           'rec': mREC(),
                           'pre': mPRE(),
                           'made': mMSELoss(),
-                         
-        # elif mode=='classification':
-        #     assert num_classes > 1
-        #     self.mdict = {'cel': nn.CrossEntropyLoss(),
-        #                   'mf1': MulticlassF1Score(num_classes).to(device),
-        #                   'acc': MulticlassAccuracy(num_classes).to(device),
-        #                   'pre': MulticlassPrecision(num_classes).to(device),
-        #                   'rec': MulticlassRecall(num_classes).to(device)
-        #                 }
-    
-    
+                          }
+        else:
+            assert False, "Unknown metric mode."
+
+    def __call__(self, pred, target):
+        if self.mode == 'sparse':
+            mask = target != 0
+            return {k: fn(pred, target, mask) for k, fn in self.mdict.items()}
+        out = {k: fn(pred, target) for k, fn in self.mdict.items()}
+        return out
+
+
 def print_metrics(metrics: dict):
     res = [k+": "+str(v.item()) for k, v in metrics.items()]
     print(" | ".join(res))

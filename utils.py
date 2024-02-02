@@ -2,12 +2,11 @@ import numpy as np
 import torch
 
 
-def seedall(seed:int, cuda: bool=False):
+def seedall(seed:int=42):
     np.random.seed(seed)
     torch.manual_seed(seed)
-    if cuda:
+    if torch.cuda.is_available():
         torch.cuda.manual_seed(seed)
-
 
 def off_diag_index(n):
     return np.ravel_multi_index(np.where(np.ones((n, n)) - np.eye(n)), [n, n])
