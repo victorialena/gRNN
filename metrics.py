@@ -4,13 +4,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-# from torchmetrics.classification import MulticlassF1Score, MulticlassAccuracy, MulticlassRecall, MulticlassPrecision
 from torchmetrics.classification import BinaryAccuracy, BinaryRecall, BinaryPrecision
+
 
 class RMSELoss(nn.Module):
     def __init__(self):
         super().__init__()
-        self.mse = nn.MSELoss() # reduction='none')
+        self.mse = nn.MSELoss()
         self.eps = 1e-6
         
     def forward(self, yhat, y):
@@ -99,8 +99,7 @@ class MetricSuite():
                           'rec': mREC(),
                           'pre': mPRE(),
                           'made': mMSELoss(),
-                          'mmse': mADELoss(),
-                        }
+                         
         # elif mode=='classification':
         #     assert num_classes > 1
         #     self.mdict = {'cel': nn.CrossEntropyLoss(),
@@ -109,16 +108,6 @@ class MetricSuite():
         #                   'pre': MulticlassPrecision(num_classes).to(device),
         #                   'rec': MulticlassRecall(num_classes).to(device)
         #                 }
-
-        else:
-            assert False, "Unknown metric mode."
-
-    def __call__(self, pred, target, mask=None):
-        if self.mode == 'sparse':
-            mask = target != 0
-            return {k: fn(pred, target, mask) for k, fn in self.mdict.items()}
-        out = {k: fn(pred, target) for k, fn in self.mdict.items()}
-        return out
     
     
 def print_metrics(metrics: dict):

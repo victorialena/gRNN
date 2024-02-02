@@ -10,11 +10,8 @@ import torch_geometric.nn as gnn
 from tqdm import trange
 from torch.optim import Adam
 from torch.utils.data import TensorDataset, DataLoader, random_split
-from metrics import MetricSuite, print_metrics #, loss_over_epoch
+from metrics import MetricSuite, print_metrics 
 from data.covid.prepare_dataset import prepare_dataset
-
-from data.covid.dataset.us_state_abbreviations import std_scaling, minmax_scaling
-# from utils import std_scaling, minmax_scaling
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -39,17 +36,6 @@ def seedall(seed=42):
 data = pd.read_csv(DATA_PATH + 'features.csv')
 data = data.sort_values(by=['date', 'location_key'], ignore_index=True)
 
-# scaling
-# data[std_scaling_cols+minmax_scaling_cols] = std_scaling(data[std_scaling_cols+minmax_scaling_cols])
-# data[minmax_scaling_cols] = minmax_scaling(data[minmax_scaling_cols])s
-
-# col2idx = {col:i for i, col in enumerate(list(data.columns)[2:])}
-# std_scaling_cols = list(map(col2idx.get, std_scaling))
-# minmax_scaling_cols = list(map(col2idx.get, minmax_scaling))
-
-
-# pdb.set_trace()
-
 X = data.drop(columns=['date', 'location_key']).to_numpy().reshape((TIMESTEPS, NUM_NODES, NUM_FEATS))
 features = np.zeros((TIMESTEPS//SliWindow, MAX_STEPS, NUM_NODES, NUM_FEATS))
 for i, idx in enumerate(range(0, TIMESTEPS-MAX_STEPS, SliWindow)):
@@ -61,12 +47,8 @@ assert np.isnan(features).sum() == 0
 edges = np.load(DATA_PATH + 'edges.npy')
 edges = torch.tensor(edges, dtype=int).repeat(TIMESTEPS//SliWindow, 1, 1)
 
-# pdb.set_trace()
 mu, std = data.mean(numeric_only=True).to_numpy()[2:], data.std(numeric_only=True).to_numpy()[2:] 
 scaling = (mu, std)
-
-# _min, _max = data[minmax_scaling].min(numeric_only=True).to_numpy(), data[minmax_scaling].max(numeric_only=True).to_numpy()    
-# scaling = (mu, std, _min, _max)
 
 print("normalizing data...")
 features[..., 2:] = (features[..., 2:]-mu.reshape((1,1,1,-1))) / std.reshape((1,1,1,-1))
@@ -78,7 +60,7 @@ _input, labels = torch.Tensor(features[:, :-PRD_STEPS]), torch.Tensor(features[:
 dataset = TensorDataset(_input.to(device), labels.to(device), edges.to(device))
 
 train_size = int(len(dataset) * 0.9)
-val_size = 0 # int(len(dataset) * 0.1)
+val_size = 0
 test_size = len(dataset) - train_size - val_size
 
 seedall()
@@ -91,20 +73,6 @@ test_loader = DataLoader(test_dataset,  **params)
 
 
 #---------------- MODEL
-
-class GNNembedding(nn.Module):
-    """
-    Note: self-loops are not necessary since we included them in the graph, but for good measure/std practice
-    """
-    def __init__(self, input_dim, output_dim=128):
-        super().__init__()
-        self.model = gnn.Sequential('x, edge_index', [
-            (gnn.GraphSAGE(input_dim, output_dim, num_layers=1, act='relu', dropout=0.0), 'x, edge_index -> x'),
-        ])
-    
-    def forward(self, x, edge_index):
-        return self.model(x, edge_index)
-
 
 def train(model, data_loader, optimizer, loss_fn, num_epoch):
     model.train()
@@ -163,8 +131,6 @@ class GCRUCell(nn.Module):
 
         # New memory content
         self.xn_hn = gnn.GraphSAGE(input_size+hidden_size, hidden_size, num_layers=1, act='tanh', dropout=0.0)
-        # self.xn = nn.Linear(input_dim, hidden_size)
-        # self.hn = nn.Linear(hidden_size, hidden_size, bias=False)
 
     def forward(self, x, edge_index, h_prev=None):
         # pdb.set_trace()
@@ -177,7 +143,6 @@ class GCRUCell(nn.Module):
 
         # New memory content
         n = self.xn_hn(torch.cat([x, r * h_prev], dim=-1), edge_index)
-        # n = torch.tanh(self.xn(x) + self.hn(r * h_prev))
 
         return (1 - z) * n + z * h_prev
 
@@ -189,7 +154,6 @@ class GCRU(nn.Module):
 
     def forward(self, x, edge_index, h_prev=None):
         # x is expected to be of shape (seq_len, batch, input_size)
-        # pdb.set_trace()
         outputs = []
         for t in range(x.size(0)):
             h_prev = self.gru_cell(x[t], edge_index, h_prev)
@@ -205,30 +169,27 @@ class DirectMultiStepModel(nn.Module):
         self.precition_horizon = precition_horizon
         self.output_dim = output_dim
         
-        # self.emb = GNNembedding(input_dim, hidden_dim)
         self.layer1 = GCRU(input_dim, hidden_dim[0])
         self.layer2 = GCRU(hidden_dim[0], hidden_dim[1])
         self.fc = nn.Linear(hidden_dim[1], output_dim*precition_horizon)
         
     def forward(self, x, edge_index):
-        # out = self.emb(x, edge_index)
-        out, hidden1 = self.layer1(x, edge_index)
-        out, hidden2 = self.layer2(out, edge_index) #, hidden)
-        out = self.fc(hidden2).relu()
+        out, _ = self.layer1(x, edge_index)
+        out, hidden = self.layer2(out, edge_index)
+        out = self.fc(hidden).relu()
         return out.reshape(-1, self.precition_horizon, self.output_dim).swapdims(0, 1)
 
 
 
 #-------------- TRAIN
 
-# label_ids = [0, 1]
 in_channels, out_channels = features.shape[-1], len(label_ids)
 
 seedall()
 model = DirectMultiStepModel(in_channels, out_channels, PRD_STEPS).to(device)
 optimizer = Adam(model.parameters(), lr=2e-4)
 
-loss_fn = nn.MSELoss() #NLLLoss()
+loss_fn = nn.MSELoss()
 metrics = MetricSuite()
 sparse_metrics = MetricSuite(mode='sparse')
 
