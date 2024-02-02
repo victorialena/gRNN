@@ -16,3 +16,10 @@ def off_diag_index(n):
 def normalize(data, data_max, data_min):
     return (data - data_min) * 2 / (data_max - data_min) - 1
 
+
+def std_scaling(df):
+    return (df-df.mean())/(df.std())
+
+
+def minmax_scaling(df):
+    return (df-df.min())/(df.max()-df.min())

@@ -4,7 +4,9 @@ import torch
 import torch.nn as nn
 import torch_geometric.nn as gnn
 
-from typing import Union, List
+from typing import Union, List, Literal
+
+type mode = Literal['relu', 'softmax']
 
 
 class GCRUCell(nn.Module):
@@ -27,7 +29,8 @@ class GCRUCell(nn.Module):
         self.hz = nn.Linear(hidden_size, hidden_size, bias=False)
 
         # New memory content
-        self.xn_hn = gnn.GraphSAGE(input_size+hidden_size, hidden_size, num_layers=1, act='tanh', dropout=0.0, node_dim=-2)
+        self.xn_hn = gnn.GraphSAGE(input_size+hidden_size, hidden_size, 
+                                   num_layers=1, act='tanh', dropout=0.0, node_dim=-2)
         # self.xn = nn.Linear(input_dim, hidden_size)
         # self.hn = nn.Linear(hidden_size, hidden_size, bias=False)
 
@@ -62,14 +65,14 @@ class GCRU(nn.Module):
     
 
 class rGNN(nn.Module):
-    def __init__(self, dimensions:List[int], num_nodes, **kwargs):
+    def __init__(self, dimensions:List[int], num_nodes:int, activation:mode, **kwargs):
         super().__init__()
         self.dimensions = dimensions
         self.num_nodes = num_nodes
 
         self.layer1 = GCRU(dimensions[0], dimensions[1])
         self.linear = nn.Linear(dimensions[1]*num_nodes, dimensions[2])
-        self.activation = nn.Softmax()
+        self.activation = nn.ReLU() if activation=='relu' else nn.Softmax()
 
     def forward(self, x, edge_index):
         bs, N, T, d = x.shape

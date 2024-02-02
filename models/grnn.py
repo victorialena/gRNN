@@ -5,12 +5,14 @@ import torch.nn as nn
 from torch_geometric.nn import MessagePassing
 from torch_geometric.utils import add_self_loops, degree
 
-from typing import List
+from typing import Union, List, Literal
+
+type mode = Literal['relu', 'softmax']
 
 
 class GlstmConv(MessagePassing):
-    def __init__(self, in_channels, out_channels, add_self_loops: bool = True):
-        super().__init__(aggr='add')  # "Add" aggregation (Step 5).
+    def __init__(self, in_channels, out_channels, add_self_loops:bool=True):
+        super().__init__(aggr='mean') # 'add' # "Add" aggregation (Step 5).
         
         self.add_self_loops = add_self_loops
         
@@ -24,7 +26,7 @@ class GlstmConv(MessagePassing):
         self.bias.data.zero_()
 
     def forward(self, x, edge_index, h0=None):
-        # bs, N, T, d = x.shape
+        bs, N, T, d = x.shape
         # x has shape [N, in_channels]
         # edge_index has shape [2, E]
 
@@ -33,7 +35,8 @@ class GlstmConv(MessagePassing):
             edge_index, _ = add_self_loops(edge_index, num_nodes=x.size(1))
 
         # Step 2: Linearly transform node feature matrix.
-        x, h0 = self.lstm(x.view(), h0)
+        xp, h0 = self.lstm(x.view((bs*N, T, d)), h0)
+        x = xp.reshape((bs, N, T, -1))
 
         # Step 3: Compute normalization.
         row, col = edge_index
@@ -51,18 +54,19 @@ class GlstmConv(MessagePassing):
         # x_j has shape [E, out_channels]
 
         # Step 4: Normalize node features.
+        pdb.set_trace()
         return norm.view(-1, 1) * x_j
     
 
 class gRNN(nn.Module):
-    def __init__(self, dimensions:List[int], num_nodes:int, **kwargs):
+    def __init__(self, dimensions:List[int], num_nodes:int, activation:mode, **kwargs):
         super().__init__()
         self.dimensions = dimensions
 
         self.layer1 = GlstmConv(dimensions[0], dimensions[1])
         self.layer2 = GlstmConv(dimensions[1], dimensions[2])
         self.linear = nn.Linear(dimensions[2]*num_nodes, dimensions[3])
-        self.activation = nn.Softmax()
+        self.activation = nn.ReLU() if activation=='relu' else nn.Softmax()
 
     def forward(self, x, edge_index):
         bs, N, T, _ = x.shape

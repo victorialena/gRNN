@@ -9,7 +9,8 @@ from utils import *
 
 DATA_PATH = '/home/victorialena/gRNN/data/covid/dataset/'
 # DATASET_SIZE = 100000
-MAX_STEPS = 30+10
+PRD_STEPS = 7
+MAX_STEPS = 21+PRD_STEPS
 NUM_NODES = 51
 NUM_FEATS = 58
 TIMESTEPS = 991
@@ -19,10 +20,10 @@ SliWindow = 4
 def prepare_dataset(args):
     # Load data
     # Shape [num_sims, num_timesteps, num_agents, num_dims]
-    features = pd.read_csv(DATA_PATH + 'features.csv', header=True)
+    data = pd.read_csv(DATA_PATH + 'features.csv')
     data = data.sort_values(by=['date', 'location_key'], ignore_index=True)
     
-    X = data.drop(['date', 'location_key']).to_numpy().reshape((TIMESTEPS, NUM_NODES, NUM_FEATS))
+    X = data.drop(columns=['date', 'location_key']).to_numpy().reshape((TIMESTEPS, NUM_NODES, NUM_FEATS))
     features = np.zeros((TIMESTEPS//SliWindow, MAX_STEPS, NUM_NODES, NUM_FEATS))
     for i, idx in enumerate(range(0, TIMESTEPS-SliWindow, SliWindow)):
         features[i] = X[idx:idx+MAX_STEPS]
@@ -40,9 +41,9 @@ def prepare_dataset(args):
         features = (features-mu.reshape((1,1,1,-1))) / std.reshape((1,1,1,-1))
 
     # Convert to pytorch cuda tensor.
-    input, labels = features[:, :-10], features[:, -10:]    
-    dataset = TensorDataset(torch.Tensor(input).swapaxes(1, 2), 
-                            torch.tensor(edges, dtype=int), 
+    _input, labels = features[:, :-PRD_STEPS], features[:, -PRD_STEPS:]
+    dataset = TensorDataset(torch.Tensor(_input).swapaxes(1, 2), 
+                            torch.tensor(edges, dtype=int).repeat(TIMESTEPS//SliWindow, 1, 1), 
                             torch.Tensor(labels).swapaxes(1, 2))
 
     train_size = int(len(dataset) * 0.8)

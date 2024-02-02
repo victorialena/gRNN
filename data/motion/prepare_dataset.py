@@ -6,7 +6,7 @@ from torch.utils.data import TensorDataset, DataLoader, random_split
 from utils import *
 
 
-DATA_PATH = '/home/victorialena/mocap/dataset/'
+DATA_PATH = '/home/victorialena/mocap_dataset/'
 # DATASET_SIZE = 100000
 MAX_STEPS = 120
 NUM_JOINTS = 31
