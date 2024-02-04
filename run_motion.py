@@ -11,7 +11,7 @@ from tqdm import trange
 
 from utils import *
 from metrics import MetricSuite, print_metrics
-from models.direct_multi_step import get_model, DirectMultiStepModel
+from models.utils import get_model
 
 from data.motion.prepare_dataset import prepare_dataset
 

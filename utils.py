@@ -22,3 +22,25 @@ def std_scaling(df):
 
 def minmax_scaling(df):
     return (df-df.min())/(df.max()-df.min())
+
+
+def which_model(name):
+    if name=='rgnn':
+        from models.rgnn import DirectMultiStepModel
+        return DirectMultiStepModel
+    if name=='grnn':
+        from models.grnn import DirectMultiStepModel
+        return DirectMultiStepModel
+    if name=='mlp':
+        from models.baselines import mlpBaseline
+        return mlpBaseline
+    if name=='lstm':
+        from models.baselines import lstmBaseline
+        return lstmBaseline
+    if name=='rnn2gnn':
+        from models.baselines import rnn2gnn
+        return rnn2gnn
+    if name=='gnn2rnn':
+        from models.baselines import gnn2rnn
+        return gnn2rnn
+    

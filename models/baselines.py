@@ -1,119 +1,91 @@
+import torch
 import torch.nn as nn
 import torch_geometric.nn as gnn
 
-from collections import OrderedDict
-from typing import Union, List
-
 import pdb
 
+from data.covid.prepare_dataset import NUM_NODES, MAX_STEPS
 
-class mySoftmax(nn.Module):
-    def __init__(self, in_dim, num_classes):
-        super().__init__()
-        self.layers = nn.Linear(in_dim, num_classes)
-        self.activation = nn.Softmax()
-
-    def forward(self, x):
-        bs = x.shape[0]
-        return self.activation(self.layers(x.reshape(bs, -1)))
-
-
-class mlpBaseline(nn.Module):
-    def __init__(self, dimensions:List[int], history:int, num_nodes:int):
-        super().__init__()
-
-        dimensions[0] *= history
-        self.dimensions = dimensions
-        layers = []
-        
-        for i, (dim_in, dim_out) in enumerate(zip(dimensions[:-2], dimensions[1:-1])):
-            layers.append(('linear_'+str(i), nn.Linear(dim_in, dim_out)))
-            layers.append(('relu_'+str(i), nn.ReLU()))
-        self.layers = nn.Sequential(OrderedDict(layers))
-        self.activation = mySoftmax(num_nodes*dimensions[-2], dimensions[-1])
-        
-    def forward(self, x, **kwargs):
-        bs, N, T, d = x.shape
-        out = self.layers(x.reshape(bs, N, T*d))
-        return self.activation(out)
-
-    def dims(self):
-        return self.dimensions
-    
-
-class lstmBaseline(nn.Module):
-    def __init__(self, dimensions:List[int], num_nodes:int, **kwargs):
-        super().__init__()
-
-        self.dimensions = dimensions
-        layers = []
-        for i, (dim_in, dim_out) in enumerate(zip(dimensions[:-2], dimensions[1:-1])):
-            layers.append(('lstm_'+str(i), nn.LSTM(dim_in, dim_out, batch_first=True, dropout=0.0)))
-
-        self.layers = nn.ModuleDict(OrderedDict(layers))
-        self.activation = mySoftmax(num_nodes*dimensions[-2], dimensions[-1])
-        
-    def forward(self, x, **kwargs):
-        bs, N, T, d = x.shape
-        out, hidden = x.reshape(bs*N, T, d), None
-
-        for _, rnn in self.layers.items():
-            out, hidden = rnn(out, hidden)
-
-        return self.activation(out[:, -1].reshape(bs, N, -1))
-    
-    def dims(self):
-        return self.dimensions
 
 
 class GNNembedding(nn.Module):
     """
     Note: self-loops are not necessary since we included them in the graph, but for good measure/std practice
     """
-    def __init__(self, dimensions:List[int], node_dim=-3):
-        super().__init__()
-        self.dimensions = dimensions
-        kwargs = {'act': 'relu', 'num_layers':1, 'dropout':0.0, 'self_loops':True, 'node_dim':node_dim}
+    def __init__(self, input_dim, output_dim, hidden_dim=[]):
+        super(GNNembedding, self).__init__()
+        
+        dimensions = [input_dim] + hidden_dim + [output_dim]
+        kwargs = {'act':'relu', 'num_layers':1, 'dropout':0.0, 'self_loops':True, 'node_dim':0}
         self.model = gnn.Sequential('x, edge_index', [ 
             (gnn.GraphSAGE(dim_in, dim_out, **kwargs), 'x, edge_index -> x') for dim_in, dim_out in zip(dimensions[:-1], dimensions[1:])
             ])
     
     def forward(self, x, edge_index):
         return self.model(x, edge_index)
-    
-    def dims(self):
-        return self.dimensions
 
-
-class gnn2rnn(nn.Module):
-    def __init__(self, dimensions:List[int], **kwargs):
-        super().__init__()
-
-        self.dimensions = dimensions
-        self.gnn = GNNembedding(dimensions[:3])
-        self.rnn = lstmBaseline(dimensions[3:])
-        
-    def forward(self, x, edge_index):
-        # bs, N, T, d = x.shape
-        out = self.gnn(x, edge_index)
-        return self.rnn(out)
-
-    def dims(self):
-        return self.dimensions
-    
 
 class rnn2gnn(nn.Module):
-    def __init__(self, dimensions:List[int], **kwargs):
-        super().__init__()
+    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128]):
+        super(rnn2gnn, self).__init__()
 
-        self.dimensions = dimensions
-        self.rnn = nn.LSTM(dimensions[0], dimensions[1:3], num_layers=2)
-        self.gnn = GNNembedding(dimensions[3:], node_dim=-2)
+        self.precition_horizon = precition_horizon
+        self.rnn = nn.LSTM(input_dim, hidden_dim[0], batch_first=False, dropout=0.0)
+        self.gnn = GNNembedding(hidden_dim[0], output_dim*precition_horizon)
         
     def forward(self, x, edge_index):
-        # bs, N, T, d = x.shape
-        out, hidden = self.rnn(x)
-        return self.gnn(hidden, edge_index)
+        T, N, d = x.shape
 
-    def dims(self):
-        return self.dimensions
+        out, _ = self.rnn(x)
+        out = self.gnn(out[-1], edge_index)
+        return out.reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+    
+
+class gnn2rnn(nn.Module):
+    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128]):
+        super(gnn2rnn, self).__init__()
+
+        self.precition_horizon = precition_horizon
+        self.gnn = GNNembedding(input_dim, hidden_dim[0])
+        self.rnn = nn.LSTM(hidden_dim[0], output_dim*precition_horizon, batch_first=False, dropout=0.0)
+        
+    def forward(self, x, edge_index):
+        T, N, d = x.shape
+        
+        x = self.gnn(x, edge_index)
+        out, _ = self.rnn(x)
+        return out[-1].reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+
+
+class lstmBaseline(nn.Module):
+    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128]):
+        super().__init__()
+        
+        self.precition_horizon = precition_horizon
+        self.rnn1 = nn.LSTM(input_dim, hidden_dim[0], batch_first=False, dropout=0.0)
+        self.rnn2 = nn.LSTM(hidden_dim[0], output_dim*precition_horizon, batch_first=False, dropout=0.0)
+        
+    def forward(self, x, **kwargs):
+        T, N, d = x.shape
+        
+        out, _ = self.rnn1(x)
+        out, _ = self.rnn2(out)
+        return out[-1].reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+
+
+class mlpBaseline(nn.Module):
+    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128]):
+        super(mlpBaseline, self).__init__()
+
+        self.precition_horizon = precition_horizon
+        self.layers = nn.Sequential(
+            nn.Linear(input_dim*(MAX_STEPS-precition_horizon), hidden_dim[0]),
+            nn.ReLU(),
+            nn.Linear(hidden_dim[0], output_dim*precition_horizon),
+            nn.ReLU(),
+        )
+        
+    def forward(self, x, **kwargs):
+        T, N, d = x.shape
+        x = x.swapdims(0, 1).reshape(N, T*d)
+        return self.layers(x).reshape(N, self.precition_horizon, -1).swapdims(0, 1)

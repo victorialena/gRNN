@@ -4,21 +4,25 @@ import pdb
 import numpy as np
 import torch
 import torch.nn as nn
-# import torch.nn.functional as F
-# import torch_geometric.nn as gnn
 
 from torch.optim import Adam
 from tqdm import trange
 
 from data.covid.prepare_dataset import prepare_dataset, PRD_STEPS
 from metrics import MetricSuite, print_metrics
-from models.rgnn import DirectMultiStepModel
-from utils import seedall
+from utils import seedall, which_model
+
+# from models.rgnn import DirectMultiStepModel
+# from models.grnn import DirectMultiStepModel
+# from models.baselines import lstmBaseline as DirectMultiStepModel
+# from models.baselines import mlpBaseline as DirectMultiStepModel
+# from models.baselines import rnn2gnn as DirectMultiStepModel
+# from models.baselines import gnn2rnn as DirectMultiStepModel
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
-# parser.add_argument('--model', type=str, default='rgnn', help='Model type to be used.', choices=['rgnn', 'grnn', 'mlp', 'lstm', 'rnn2gnn', 'gnn2rnn'])
+parser.add_argument('--model', type=str, default='rgnn', help='Model type to be used.', choices=['rgnn', 'grnn', 'mlp', 'lstm', 'rnn2gnn', 'gnn2rnn'])
 parser.add_argument('--num_epoch', type=int, default=10, help='Number of epochs to train.')
 parser.add_argument('--batch_size', type=int, default=1, help='Number of samples per batch.')
 parser.add_argument('--learning_rate', type=float, default=2e-4, help='Initial learning rate.')
@@ -41,7 +45,7 @@ def train(model, data_loader, optimizer, loss_fn, num_epoch):
         losses = []
         for x, y, edges in data_loader:
             x, y, edges = x.squeeze(0), y.squeeze(0), edges.squeeze(0)
-            yhat = model(x, edges)
+            yhat = model(x, edge_index=edges)
 
             optimizer.zero_grad()
             loss = loss_fn(yhat, y)
@@ -62,7 +66,7 @@ def evaluate(model, data_loader, metrics):
     with torch.no_grad():
         for x, y, edges in data_loader:
             x, y, edges = x.squeeze(0), y.squeeze(0), edges.squeeze(0)
-            Yhat.append(model(x, edges))
+            Yhat.append(model(x, edge_index=edges))
             Y.append(y)
 
     Y, Yhat = torch.stack(Y, axis=0), torch.stack(Yhat, axis=0)
@@ -76,6 +80,7 @@ train_loader, test_loader, scaling, (_, NUM_NODES, MAX_STEPS, NUM_FEATS) = prepa
 in_channels, out_channels = NUM_FEATS, len(args.label_ids)
 
 seedall()
+DirectMultiStepModel = which_model(args.model)
 model = DirectMultiStepModel(in_channels, out_channels, PRD_STEPS).to(device)
 optimizer = Adam(model.parameters(), lr=args.learning_rate)
 
