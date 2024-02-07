@@ -16,7 +16,7 @@ class GNNembedding(nn.Module):
         super(GNNembedding, self).__init__()
         
         dimensions = [input_dim] + hidden_dim + [output_dim]
-        kwargs = {'act':'relu', 'num_layers':1, 'dropout':0.0, 'self_loops':True, 'node_dim':0}
+        kwargs = {'act':'relu', 'num_layers':1, 'dropout':0.0, 'self_loops':True, 'node_dim':-2}
         self.model = gnn.Sequential('x, edge_index', [ 
             (gnn.GraphSAGE(dim_in, dim_out, **kwargs), 'x, edge_index -> x') for dim_in, dim_out in zip(dimensions[:-1], dimensions[1:])
             ])
@@ -46,7 +46,7 @@ class gnn2rnn(nn.Module):
         super(gnn2rnn, self).__init__()
 
         self.precition_horizon = precition_horizon
-        self.gnn = GNNembedding(input_dim, hidden_dim[0])
+        self.gnn = gnn.GraphSAGE(input_dim, hidden_dim[0], num_layers=1)
         self.rnn = nn.LSTM(hidden_dim[0], output_dim*precition_horizon, batch_first=False, dropout=0.0)
         
     def forward(self, x, edge_index):

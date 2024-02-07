@@ -83,21 +83,22 @@ class mREC(nn.Module):
 
 
 class MetricSuite():
-    def __init__(self, mode='regression', num_classes=-1, device=None):
+    def __init__(self, mode='regression'):
         self.mdict = None
         self.mode = mode
         if mode=='regression':
-            self.mdict = {'mse': nn.MSELoss(),
+            self.mdict = {'mae': nn.L1Loss(),
+                          'mse': nn.MSELoss(),
                           'rse': RMSELoss(),
-                          'mae': nn.L1Loss(),
                           'ade': ADELoss(),
-                          'fde': FDELoss()
+                          'fde': FDELoss(),
                         }
         elif mode=='sparse':
             self.mdict = {'acc': mACC(),
-                          'rec': mREC(),
                           'pre': mPRE(),
-                          'made': mMSELoss(),
+                          'rec': mREC(),
+                          'mmse': mMSELoss(),
+                          'made': mADELoss(),
                           }
         else:
             assert False, "Unknown metric mode."
@@ -108,8 +109,18 @@ class MetricSuite():
             return {k: fn(pred, target, mask) for k, fn in self.mdict.items()}
         out = {k: fn(pred, target) for k, fn in self.mdict.items()}
         return out
+    
+    def items(self):
+        return self.mdict.items()
 
 
 def print_metrics(metrics: dict):
     res = [k+": "+str(v.item()) for k, v in metrics.items()]
     print(" | ".join(res))
+
+
+def print_csv_metrics(metrics: dict, model:str=""):
+    res = [k for k, _ in metrics.items()]
+    print(","+",".join(res))
+    res = [str(v.item()) for _, v in metrics.items()]
+    print(model+","+",".join(res))

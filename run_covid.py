@@ -9,7 +9,7 @@ from torch.optim import Adam
 from tqdm import trange
 
 from data.covid.prepare_dataset import prepare_dataset, PRD_STEPS
-from metrics import MetricSuite, print_metrics
+from metrics import MetricSuite, print_metrics, print_csv_metrics
 from utils import seedall, which_model
 
 # from models.rgnn import DirectMultiStepModel
@@ -92,6 +92,8 @@ sparse_metrics = MetricSuite(mode='sparse')
 model, loss = train(model, train_loader, optimizer, loss_fn, args.num_epoch)
 direct_metrics = evaluate(model, test_loader, [metrics, sparse_metrics])
 
-print_metrics(direct_metrics[0])
-print_metrics(direct_metrics[1])
+merged_dict = direct_metrics[0].copy()
+merged_dict.update(direct_metrics[1])
+print_metrics(merged_dict)
+print_csv_metrics(merged_dict, args.model)
 
