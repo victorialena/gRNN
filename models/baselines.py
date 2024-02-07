@@ -6,6 +6,7 @@ import pdb
 
 from data.covid.prepare_dataset import NUM_NODES, MAX_STEPS
 
+RA_WINDOW = 10
 
 
 class GNNembedding(nn.Module):
@@ -89,3 +90,31 @@ class mlpBaseline(nn.Module):
         T, N, d = x.shape
         x = x.swapdims(0, 1).reshape(N, T*d)
         return self.layers(x).reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+    
+    
+class ZeroBaseline(nn.Module):
+    def __init__(self, output_dim, precition_horizon):
+        super(ZeroBaseline, self).__init__()
+
+        self.precition_horizon = precition_horizon
+        self.output_dim = output_dim
+        
+    def forward(self, x, **kwargs):
+        T, N, d = x.shape
+        return torch.zeros((self.precition_horizon, N, self.output_dim), device=x.device)
+    
+
+class RollingAvg(nn.Module):
+    def __init__(self, output_dim, precition_horizon):
+        super(RollingAvg, self).__init__()
+
+        self.precition_horizon = precition_horizon
+        self.output_dim = output_dim
+        
+    def forward(self, x, **kwargs):
+        T, N, _ = x.shape
+        y = torch.zeros((T+self.precition_horizon, N, self.output_dim), device=x.device)
+        y[:T] = x[..., :self.output_dim]
+        for t in range(T, T+self.precition_horizon):
+            y[t] = y[t-RA_WINDOW:t].mean(0)
+        return y[-self.precition_horizon:]

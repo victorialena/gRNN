@@ -124,3 +124,12 @@ def print_csv_metrics(metrics: dict, model:str=""):
     print(","+",".join(res))
     res = [str(v.item()) for _, v in metrics.items()]
     print(model+","+",".join(res))
+
+
+def merge_and_print(metric_list: list, model_name: str):
+    merged_dict = metric_list[0].copy()
+    for metrics in metric_list[1:]:
+        merged_dict.update(metrics)
+
+    print_metrics(merged_dict)
+    print_csv_metrics(merged_dict, model_name)
