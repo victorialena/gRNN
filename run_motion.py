@@ -1,60 +1,57 @@
-import argparse, os
+import argparse
 import pdb
 
+import numpy as np
 import torch
 import torch.nn as nn
 
 from torch.optim import Adam
-# from torch.utils.data import DataLoader
-
 from tqdm import trange
 
-from utils import *
-from metrics import MetricSuite, print_metrics
-from models.utils import get_model
+from data.motion.prepare_dataset import prepare_dataset, PRD_STEPS
+from metrics import MetricSuite, merge_and_print
+from utils import seedall, which_model
 
-from data.motion.prepare_dataset import prepare_dataset
 
-NUM_CLASSES = 5
+from models.baselines import RollingAvg, ConstantAvg
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
 parser.add_argument('--model', type=str, default='rgnn', help='Model type to be used.', choices=['rgnn', 'grnn', 'mlp', 'lstm', 'rnn2gnn', 'gnn2rnn'])
-parser.add_argument('--num_epoch', type=int, default=100, help='Number of epochs to train.')
-parser.add_argument('--precition_horizon', type=int, default=0)
-parser.add_argument('--batch_size', type=int, default=128, help='Number of samples per batch.')
-parser.add_argument('--learning_rate', type=float, default=0.001, help='Initial learning rate.')
+parser.add_argument('--num_epoch', type=int, default=10, help='Number of epochs to train.')
+parser.add_argument('--naive', action='store_true', default=False, help='Evaluate Naive baselines.')
+parser.add_argument('--batch_size', type=int, default=1, help='Number of samples per batch.')
+parser.add_argument('--learning_rate', type=float, default=2e-4, help='Initial learning rate.')
 parser.add_argument('--no_cuda', action='store_true', default=False, help='Disables CUDA training.')
 parser.add_argument('--normalize', action='store_true', default=True, help='Apply feature scaling to input data.')
 parser.add_argument('--hidden_dim', nargs='+', type=int, default=[64, 64], help='List of hidden dimensions for each layer.')
+parser.add_argument('--label_ids', nargs='+', type=int, default=[0, 1, 2], help='List of hidden dimensions for each layer.')
+
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if args.cuda else "cpu")
 print(args)
 
 
 def train(model, data_loader, optimizer, loss_fn, num_epoch):
     model.train()
-    print("Training...")
     
     ep_loss = []
-    for _ in range(num_epoch):
+    for _ in trange(num_epoch, unit="Epoch"):
         losses = []
-        
-        for X, edges, labels in data_loader:
-            if args.cuda:
-                X, edges, labels = X.cuda(), edges.cuda(), labels.cuda()
-            yhat = model(X, edge_index=edges)
+        for x, y, edges in data_loader:
+            x, y, edges = x.squeeze(0), y.squeeze(0), edges.squeeze(0)
+            yhat = model(x, edge_index=edges)
 
             optimizer.zero_grad()
-            loss = loss_fn(yhat, labels)
+            loss = loss_fn(yhat, y)
             loss.backward()
             optimizer.step()
             
             losses.append(loss.item())
-        # print('CEloss:', np.mean(losses))
+        print('MSELoss:', np.mean(losses))
         
         ep_loss.append(np.mean(losses))
     return model, ep_loss
@@ -62,33 +59,45 @@ def train(model, data_loader, optimizer, loss_fn, num_epoch):
 
 def evaluate(model, data_loader, metrics):
     model.eval()
-    print("Testing...")
     
     Y, Yhat = [], []
     with torch.no_grad():
-        for X, edges, labels in data_loader:
-            if args.cuda:
-                X, edges, labels = X.cuda(), edges.cuda(), labels.cuda()
-            Yhat.append(model(X, edge_index=edges))
-            Y.append(labels)
-    Y, Yhat = torch.cat(Y, dim=0), torch.cat(Yhat, dim=0)
-    return metrics(Yhat, Y)
+        for x, y, edges in data_loader:
+            x, y, edges = x.squeeze(0), y.squeeze(0), edges.squeeze(0)
+            Yhat.append(model(x, edge_index=edges))
+            Y.append(y)
+
+    Y, Yhat = torch.stack(Y, axis=0), torch.stack(Yhat, axis=0)
+    return [m(Yhat, Y) for m in metrics]
 
 
-seedall(args.seed, args.cuda)
-train_loader, valid_loader, test_loader, scaling, size = prepare_dataset(args)
+def evaluateNaive():
+    for model_class in [ConstantAvg, RollingAvg]:
+        model = model_class(out_channels, PRD_STEPS)
 
-_, num_nodes, horizon, input_dim = size
+        metrics = MetricSuite()
+        direct_metrics = evaluate(model, test_loader, [metrics])
+        merge_and_print(direct_metrics, model_class.__name__)
 
-model = get_model(args.model, dimensions=[input_dim]+args.hidden_dim+[NUM_CLASSES], 
-                  history=horizon-args.precition_horizon,
-                  num_nodes=num_nodes)
-model.to(device)
+
+#-------------- MAIN
+
+train_loader, test_loader, scaling, (_, NUM_NODES, MAX_STEPS, NUM_FEATS) = prepare_dataset(args)
+
+in_channels, out_channels = NUM_FEATS, len(args.label_ids)
+
+seedall()
+DirectMultiStepModel = which_model(args.model)
+model = DirectMultiStepModel(in_channels, out_channels, PRD_STEPS).to(device)
 optimizer = Adam(model.parameters(), lr=args.learning_rate)
 
-loss_fn = nn.CrossEntropyLoss()
-metrics = MetricSuite(mode='classification', num_classes=NUM_CLASSES, device=device)
+loss_fn = nn.MSELoss() #nn.NLLLoss()
+metrics = MetricSuite()
 
 model, loss = train(model, train_loader, optimizer, loss_fn, args.num_epoch)
-direct_metrics = evaluate(model, test_loader, metrics)
-print_metrics(direct_metrics)
+
+direct_metrics = evaluate(model, test_loader, [metrics])
+merge_and_print(direct_metrics, args.model)
+
+if args.naive:
+    evaluateNaive()

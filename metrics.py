@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 
 from torchmetrics.classification import BinaryAccuracy, BinaryRecall, BinaryPrecision
+# from torchmetrics.classification import MulticlassF1Score, MulticlassAccuracy, MulticlassRecall, MulticlassPrecision
 
 
 class RMSELoss(nn.Module):
@@ -83,7 +84,7 @@ class mREC(nn.Module):
 
 
 class MetricSuite():
-    def __init__(self, mode='regression'):
+    def __init__(self, mode:str='regression', num_classes:int=0):
         self.mdict = None
         self.mode = mode
         if mode=='regression':
@@ -100,6 +101,15 @@ class MetricSuite():
                           'mmse': mMSELoss(),
                           'made': mADELoss(),
                           }
+        # elif mode=='classification':            
+        #     assert num_classes > 1
+        #     self.mdict = {'cel': nn.CrossEntropyLoss(),
+        #                   'mf1': MulticlassF1Score(num_classes),
+        #                   'acc': MulticlassAccuracy(num_classes),
+        #                   'pre': MulticlassPrecision(num_classes),
+        #                   'rec': MulticlassRecall(num_classes),
+        #                   }
+            
         else:
             assert False, "Unknown metric mode."
 

@@ -55,9 +55,8 @@ def prepare_dataset(args):
     train_dataset, _, test_dataset = random_split(dataset, [train_size, val_size, test_size])
 
     # Parameters
-    params = {'batch_size': args.batch_size, 'shuffle': True}
-    train_loader = DataLoader(train_dataset, **params)
-    test_loader = DataLoader(test_dataset,  **params)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
 
     return train_loader, test_loader, scaling, (args.batch_size, NUM_NODES, MAX_STEPS, NUM_FEATS)
     

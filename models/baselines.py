@@ -4,7 +4,7 @@ import torch_geometric.nn as gnn
 
 import pdb
 
-from data.covid.prepare_dataset import NUM_NODES, MAX_STEPS
+from data.motion.prepare_dataset import NUM_NODES, MAX_STEPS
 
 RA_WINDOW = 10
 
@@ -118,3 +118,16 @@ class RollingAvg(nn.Module):
         for t in range(T, T+self.precition_horizon):
             y[t] = y[t-RA_WINDOW:t].mean(0)
         return y[-self.precition_horizon:]
+    
+
+class ConstantAvg(nn.Module):
+    def __init__(self, output_dim, precition_horizon):
+        super(ConstantAvg, self).__init__()
+
+        self.precition_horizon = precition_horizon
+        self.output_dim = output_dim
+        
+    def forward(self, x, **kwargs):
+        T, N, _ = x.shape
+        avg = x[..., :self.output_dim].mean(0)
+        return avg.repeat(self.precition_horizon, 1, 1)
