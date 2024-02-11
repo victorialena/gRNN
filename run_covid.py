@@ -30,7 +30,7 @@ parser.add_argument('--batch_size', type=int, default=1, help='Number of samples
 parser.add_argument('--learning_rate', type=float, default=2e-4, help='Initial learning rate.')
 parser.add_argument('--no_cuda', action='store_true', default=False, help='Disables CUDA training.')
 parser.add_argument('--normalize', action='store_true', default=True, help='Apply feature scaling to input data.')
-parser.add_argument('--hidden_dim', nargs='+', type=int, default=[64, 64], help='List of hidden dimensions for each layer.')
+parser.add_argument('--hidden_dim', nargs='+', type=int, default=[128, 64], help='List of hidden dimensions for each layer.')
 parser.add_argument('--label_ids', nargs='+', type=int, default=[0, 1], help='List of hidden dimensions for each layer.')
 
 args = parser.parse_args()
@@ -92,7 +92,7 @@ in_channels, out_channels = NUM_FEATS, len(args.label_ids)
 
 seedall()
 DirectMultiStepModel = which_model(args.model)
-model = DirectMultiStepModel(in_channels, out_channels, PRD_STEPS).to(device)
+model = DirectMultiStepModel(in_channels, out_channels, PRD_STEPS, args.hidden_dim).to(device)
 optimizer = Adam(model.parameters(), lr=args.learning_rate)
 
 loss_fn = nn.MSELoss()

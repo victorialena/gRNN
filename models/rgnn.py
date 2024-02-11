@@ -59,7 +59,7 @@ class GCRU(nn.Module):
 
 
 class DirectMultiStepModel(nn.Module):
-    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128, 64], num_layers=1):
+    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128, 64]):
         super(DirectMultiStepModel, self).__init__()
         
         self.precition_horizon = precition_horizon
