@@ -26,7 +26,7 @@ class GCRUCell(nn.Module):
         self.hz = nn.Linear(hidden_size, hidden_size, bias=False)
 
         # New memory content
-        self.xn_hn = gnn.GraphSAGE(input_size+hidden_size, hidden_size, num_layers=1, act='tanh', dropout=0.0)
+        self.xn_hn = gnn.GraphSAGE(input_size+hidden_size, hidden_size, num_layers=1, act='tanh', dropout=0.0, normalize=True)
 
     def forward(self, x, edge_index, h_prev=None):
         # pdb.set_trace()
@@ -59,8 +59,9 @@ class GCRU(nn.Module):
 
 
 class DirectMultiStepModel(nn.Module):
-    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128, 64], num_layers=1):
+    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128, 64]):
         super(DirectMultiStepModel, self).__init__()
+        self.__class__.__name__ = 'rgnn'
         
         self.precition_horizon = precition_horizon
         self.output_dim = output_dim
@@ -71,6 +72,7 @@ class DirectMultiStepModel(nn.Module):
         
     def forward(self, x, edge_index):
         out, _ = self.layer1(x, edge_index)
-        out, hidden = self.layer2(out, edge_index)
-        out = self.fc(hidden).relu()
-        return out.reshape(-1, self.precition_horizon, self.output_dim).swapdims(0, 1)
+        out, _ = self.layer2(out, edge_index)
+        out = self.fc(out[-1]).relu()
+        out = out.reshape(-1, self.precition_horizon, self.output_dim).swapdims(0, 1)
+        return x[-1:, :, :3] + torch.cumsum(out, 0)

@@ -10,7 +10,7 @@ from tqdm import trange
 
 from data.motion.prepare_dataset import prepare_dataset, PRD_STEPS
 from metrics import MetricSuite, merge_and_print
-from utils import seedall, which_model
+from utils import seedall, which_model, unnormalize
 
 
 from models.baselines import RollingAvg, ConstantAvg
@@ -57,7 +57,7 @@ def train(model, data_loader, optimizer, loss_fn, num_epoch):
     return model, ep_loss
 
 
-def evaluate(model, data_loader, metrics):
+def evaluate(model, data_loader, metrics, save=True, naive=False):
     model.eval()
     
     Y, Yhat = [], []
@@ -68,6 +68,16 @@ def evaluate(model, data_loader, metrics):
             Y.append(y)
 
     Y, Yhat = torch.stack(Y, axis=0), torch.stack(Yhat, axis=0)
+    if save:
+        if args.normalize:
+            print("unnormalizing data...")
+            Y[..., 0] = unnormalize(Y[..., 0], x_max, x_min)
+            Y[..., 1] = unnormalize(Y[..., 1], y_max, y_min)
+            Y[..., 2] = unnormalize(Y[..., 2], z_max, z_min)
+            Yhat[..., 0] = unnormalize(Yhat[..., 0], x_max, x_min)
+            Yhat[..., 1] = unnormalize(Yhat[..., 1], y_max, y_min)
+            Yhat[..., 2] = unnormalize(Yhat[..., 2], z_max, z_min)
+        torch.save(torch.stack([Y, Yhat], dim=0), 'tmp/logs/'+model.__class__.__name__+'.pt')
     return [m(Yhat, Y) for m in metrics]
 
 
@@ -76,22 +86,24 @@ def evaluateNaive():
         model = model_class(out_channels, PRD_STEPS)
 
         metrics = MetricSuite()
-        direct_metrics = evaluate(model, test_loader, [metrics])
+        direct_metrics = evaluate(model, test_loader, [metrics], naive=True)
         merge_and_print(direct_metrics, model_class.__name__)
 
 
 #-------------- MAIN
 
 train_loader, test_loader, scaling, (_, NUM_NODES, MAX_STEPS, NUM_FEATS) = prepare_dataset(args)
+if args.normalize:
+    x_max, x_min, y_max, y_min, z_max, z_min = scaling
 
 in_channels, out_channels = NUM_FEATS, len(args.label_ids)
 
 seedall()
 DirectMultiStepModel = which_model(args.model)
-model = DirectMultiStepModel(in_channels, out_channels, PRD_STEPS).to(device)
+model = DirectMultiStepModel(in_channels, out_channels, PRD_STEPS, hidden_dim=args.hidden_dim).to(device)
 optimizer = Adam(model.parameters(), lr=args.learning_rate)
 
-loss_fn = nn.MSELoss() #nn.NLLLoss()
+loss_fn = nn.MSELoss()
 metrics = MetricSuite()
 
 model, loss = train(model, train_loader, optimizer, loss_fn, args.num_epoch)

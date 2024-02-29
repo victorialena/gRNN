@@ -6,13 +6,13 @@ from torch.utils.data import TensorDataset, DataLoader, random_split
 from utils import normalize, seedall
 
 
-# DATA_PATH = '/home/victorialena/mocap_dataset/'
-DATA_PATH = '/home/victorialena/dGVAE/data/motion/35/'
+DATA_PATH = '/home/victorialena/mocap_dataset/'
+# DATA_PATH = '/home/victorialena/dGVAE/data/motion/35/'
 
-MAX_STEPS = 49
+MAX_STEPS = 60
 NUM_NODES = 31
 NUM_FEATS = 6
-PRD_STEPS = 10
+PRD_STEPS = MAX_STEPS // 4
 
 
 
@@ -20,10 +20,24 @@ def prepare_dataset(args):
     device = torch.device("cuda" if (torch.cuda.is_available() and args.cuda) else "cpu")
 
     # Load data
-    features = np.load(DATA_PATH + 'all_features.npy', allow_pickle=True)
-    features = features[:, :MAX_STEPS]
+    features = np.load(DATA_PATH + 'features.npy', allow_pickle=True)
+    features = features[:, ::2]
+    _, T, N, d = features.shape
+
+    # Note: split into sequences of MAX_STEPS
+    # if T%MAX_STEPS > 0:
+    #     features = features[:, :-(T%MAX_STEPS)]
+    # features = features.reshape((b, -1, MAX_STEPS, N, d)).swapaxes(0,1).reshape((-1, MAX_STEPS, N, d))
+    
+    assert (NUM_FEATS == d) and (NUM_NODES == N) and (MAX_STEPS == T), "Loaded wrong dataset!"
+    print('Dataset size:', features.shape[0])
+    
 
     _src, _dst = np.load(DATA_PATH + 'edges.npy').T
+
+    # Note: these are all the same (_src[:, 0] == _src).all()
+    _src, _dst = _src[:, 0], _dst[:, 0]
+    
     src, dst = torch.tensor(np.append(_src, _dst)), torch.tensor(np.append(_dst, _src))
     edges = torch.stack([src, dst])
     

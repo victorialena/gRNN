@@ -102,8 +102,8 @@ def valid_dir(data_path):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='/home/victorialena/mocap/') #35/') #118/')
-    parser.add_argument('--out_path', type=str, default='/home/victorialena/mocap/dataset/') #35/') #118/')
+    parser.add_argument('--data_dir', type=str, default='/home/victorialena/mocap/')
+    parser.add_argument('--out_path', type=str, default='/home/victorialena/mocap/dataset/')
     parser.add_argument('--seq_len', type=int, default=120)
     args = parser.parse_args()
 
@@ -122,6 +122,8 @@ if __name__ == '__main__':
     graphs = []
 
     for label in sorted(os.listdir(root)):
+        if label in ['basketball', 'dance', 'salsa_61', 'run_141']:
+            continue
         data_path = os.path.join(root, label)
 
         label = label.split('_')[0]

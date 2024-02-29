@@ -1,0 +1,168 @@
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[128, 64], label_ids=[0, 1, 2], learning_rate=0.0002, model='grnn', naive=False, no_cuda=False, normalize=True, num_epoch=30, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/30 [00:00<?, ?Epoch/s]  3%|▎         | 1/30 [00:01<00:48,  1.66s/Epoch]  7%|▋         | 2/30 [00:03<00:43,  1.57s/Epoch] 10%|█         | 3/30 [00:04<00:41,  1.55s/Epoch] 13%|█▎        | 4/30 [00:06<00:39,  1.53s/Epoch] 17%|█▋        | 5/30 [00:07<00:38,  1.52s/Epoch] 20%|██        | 6/30 [00:09<00:36,  1.52s/Epoch] 23%|██▎       | 7/30 [00:10<00:34,  1.52s/Epoch] 27%|██▋       | 8/30 [00:12<00:33,  1.52s/Epoch] 30%|███       | 9/30 [00:13<00:31,  1.52s/Epoch] 33%|███▎      | 10/30 [00:15<00:30,  1.52s/Epoch] 37%|███▋      | 11/30 [00:16<00:28,  1.51s/Epoch] 40%|████      | 12/30 [00:18<00:27,  1.51s/Epoch] 43%|████▎     | 13/30 [00:19<00:25,  1.51s/Epoch] 47%|████▋     | 14/30 [00:21<00:24,  1.50s/Epoch] 50%|█████     | 15/30 [00:22<00:22,  1.50s/Epoch] 53%|█████▎    | 16/30 [00:24<00:21,  1.50s/Epoch] 57%|█████▋    | 17/30 [00:25<00:19,  1.50s/Epoch] 60%|██████    | 18/30 [00:27<00:17,  1.50s/Epoch] 63%|██████▎   | 19/30 [00:28<00:16,  1.50s/Epoch] 67%|██████▋   | 20/30 [00:30<00:15,  1.51s/Epoch] 70%|███████   | 21/30 [00:31<00:13,  1.51s/Epoch] 73%|███████▎  | 22/30 [00:33<00:12,  1.51s/Epoch] 77%|███████▋  | 23/30 [00:34<00:10,  1.51s/Epoch] 80%|████████  | 24/30 [00:36<00:09,  1.50s/Epoch] 83%|████████▎ | 25/30 [00:37<00:07,  1.50s/Epoch] 87%|████████▋ | 26/30 [00:39<00:06,  1.50s/Epoch] 90%|█████████ | 27/30 [00:40<00:04,  1.51s/Epoch] 93%|█████████▎| 28/30 [00:42<00:03,  1.51s/Epoch] 97%|█████████▋| 29/30 [00:43<00:01,  1.51s/Epoch]100%|██████████| 30/30 [00:45<00:00,  1.51s/Epoch]100%|██████████| 30/30 [00:45<00:00,  1.51s/Epoch]
+MSELoss: 0.0068707892280170275
+MSELoss: 0.002724922408224543
+MSELoss: 0.0026256711163183755
+MSELoss: 0.002574146434883669
+MSELoss: 0.0025444077465582365
+MSELoss: 0.002526919002476481
+MSELoss: 0.0025128015779392666
+MSELoss: 0.0024999979616929335
+MSELoss: 0.002462291636902237
+MSELoss: 0.002401896926505157
+MSELoss: 0.002345605365933398
+MSELoss: 0.0022990769163170315
+MSELoss: 0.002256305940118636
+MSELoss: 0.002235501540710881
+MSELoss: 0.0022049670916734123
+MSELoss: 0.002187119225013334
+MSELoss: 0.0021453000933824838
+MSELoss: 0.0021262442328603775
+MSELoss: 0.0021012629703422102
+MSELoss: 0.002071429460756889
+MSELoss: 0.0020488702971070893
+MSELoss: 0.002035960602696131
+MSELoss: 0.0020126965158576557
+MSELoss: 0.0020102876676086575
+MSELoss: 0.0019900684292380546
+MSELoss: 0.0019896654379936746
+MSELoss: 0.0019677407354898057
+MSELoss: 0.0019475161254666675
+MSELoss: 0.0019457408900634987
+MSELoss: 0.0019422861146351036
+unnormalizing data...
+mae: 0.6738510131835938 | mse: 2.2361466884613037 | rse: 1.495375394821167 | ade: 1.4424666166305542 | fde: 2.6004221439361572
+,mae,mse,rse,ade,fde
+grnn,0.6738510131835938,2.2361466884613037,1.495375394821167,1.4424666166305542,2.6004221439361572
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[128, 64], label_ids=[0, 1, 2], learning_rate=0.0002, model='rgnn', naive=False, no_cuda=False, normalize=True, num_epoch=30, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/30 [00:00<?, ?Epoch/s]  3%|▎         | 1/30 [01:01<29:47, 61.62s/Epoch]  7%|▋         | 2/30 [02:03<28:46, 61.67s/Epoch] 10%|█         | 3/30 [03:03<27:32, 61.20s/Epoch] 13%|█▎        | 4/30 [04:04<26:24, 60.95s/Epoch] 17%|█▋        | 5/30 [05:05<25:22, 60.89s/Epoch] 20%|██        | 6/30 [06:06<24:20, 60.83s/Epoch] 23%|██▎       | 7/30 [07:06<23:18, 60.80s/Epoch] 27%|██▋       | 8/30 [08:07<22:17, 60.78s/Epoch] 30%|███       | 9/30 [09:08<21:15, 60.76s/Epoch] 33%|███▎      | 10/30 [10:08<20:14, 60.74s/Epoch] 37%|███▋      | 11/30 [11:09<19:14, 60.74s/Epoch] 40%|████      | 12/30 [12:10<18:13, 60.76s/Epoch] 43%|████▎     | 13/30 [13:11<17:12, 60.76s/Epoch] 47%|████▋     | 14/30 [14:11<16:11, 60.73s/Epoch] 50%|█████     | 15/30 [15:12<15:11, 60.73s/Epoch] 53%|█████▎    | 16/30 [16:13<14:10, 60.73s/Epoch] 57%|█████▋    | 17/30 [17:14<13:09, 60.71s/Epoch] 60%|██████    | 18/30 [18:14<12:08, 60.72s/Epoch] 63%|██████▎   | 19/30 [19:15<11:07, 60.73s/Epoch] 67%|██████▋   | 20/30 [20:16<10:07, 60.73s/Epoch] 70%|███████   | 21/30 [21:16<09:06, 60.73s/Epoch] 73%|███████▎  | 22/30 [22:17<08:05, 60.73s/Epoch] 77%|███████▋  | 23/30 [23:18<07:05, 60.72s/Epoch] 80%|████████  | 24/30 [24:19<06:04, 60.72s/Epoch] 83%|████████▎ | 25/30 [25:20<05:04, 60.90s/Epoch] 87%|████████▋ | 26/30 [26:23<04:05, 61.42s/Epoch] 90%|█████████ | 27/30 [27:26<03:05, 61.94s/Epoch] 93%|█████████▎| 28/30 [28:28<02:04, 62.05s/Epoch] 97%|█████████▋| 29/30 [29:32<01:02, 62.58s/Epoch]100%|██████████| 30/30 [30:34<00:00, 62.35s/Epoch]100%|██████████| 30/30 [30:34<00:00, 61.14s/Epoch]
+MSELoss: 0.003161744114106551
+MSELoss: 0.0025719244712543174
+MSELoss: 0.0025401195747538513
+MSELoss: 0.0024548696825820587
+MSELoss: 0.0023346575497224437
+MSELoss: 0.002255442755741252
+MSELoss: 0.0022212167900335753
+MSELoss: 0.002192884041759771
+MSELoss: 0.0021759414198618855
+MSELoss: 0.0021483100041443503
+MSELoss: 0.0021286363434331805
+MSELoss: 0.0021030777408469394
+MSELoss: 0.0020997913521197333
+MSELoss: 0.0020841023889367006
+MSELoss: 0.0020737926751838937
+MSELoss: 0.002067597547505988
+MSELoss: 0.002049428892767547
+MSELoss: 0.0020465716543452334
+MSELoss: 0.0020290720393639538
+MSELoss: 0.0020207287129447933
+MSELoss: 0.002007683142739464
+MSELoss: 0.001991407387870612
+MSELoss: 0.0019879764727071614
+MSELoss: 0.0019795876462260654
+MSELoss: 0.001967884262943136
+MSELoss: 0.0019778492938893407
+MSELoss: 0.001945051094952683
+MSELoss: 0.001955815195400048
+MSELoss: 0.0019515320864881371
+MSELoss: 0.001939524854856032
+unnormalizing data...
+mae: 0.6483364701271057 | mse: 2.034766674041748 | rse: 1.4264527559280396 | ade: 1.4027364253997803 | fde: 2.443530797958374
+,mae,mse,rse,ade,fde
+rgnn,0.6483364701271057,2.034766674041748,1.4264527559280396,1.4027364253997803,2.443530797958374
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[64, 64], label_ids=[0, 1, 2], learning_rate=0.0002, model='mlp', naive=False, no_cuda=False, normalize=True, num_epoch=10, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/10 [00:00<?, ?Epoch/s] 10%|█         | 1/10 [00:00<00:08,  1.12Epoch/s] 20%|██        | 2/10 [00:01<00:05,  1.41Epoch/s] 30%|███       | 3/10 [00:02<00:04,  1.55Epoch/s] 40%|████      | 4/10 [00:02<00:03,  1.62Epoch/s] 50%|█████     | 5/10 [00:03<00:03,  1.66Epoch/s] 60%|██████    | 6/10 [00:03<00:02,  1.69Epoch/s] 70%|███████   | 7/10 [00:04<00:01,  1.71Epoch/s] 80%|████████  | 8/10 [00:04<00:01,  1.72Epoch/s] 90%|█████████ | 9/10 [00:05<00:00,  1.73Epoch/s]100%|██████████| 10/10 [00:06<00:00,  1.74Epoch/s]100%|██████████| 10/10 [00:06<00:00,  1.65Epoch/s]
+MSELoss: 0.007197656506211108
+MSELoss: 0.002621246346789178
+MSELoss: 0.0024378616994802536
+MSELoss: 0.0023416439450286287
+MSELoss: 0.002263447934718473
+MSELoss: 0.0022105290548316615
+MSELoss: 0.0021781373985747953
+MSELoss: 0.0021312234036257663
+MSELoss: 0.0020941253286881696
+MSELoss: 0.0020793922848031097
+unnormalizing data...
+mae: 0.7610266804695129 | mse: 2.5817320346832275 | rse: 1.6067771911621094 | ade: 1.655703067779541 | fde: 2.9675121307373047
+,mae,mse,rse,ade,fde
+mlp,0.7610266804695129,2.5817320346832275,1.6067771911621094,1.655703067779541,2.9675121307373047
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[64, 64], label_ids=[0, 1, 2], learning_rate=0.0002, model='lstm', naive=False, no_cuda=False, normalize=True, num_epoch=10, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/10 [00:00<?, ?Epoch/s] 10%|█         | 1/10 [00:01<00:09,  1.02s/Epoch] 20%|██        | 2/10 [00:01<00:07,  1.07Epoch/s] 30%|███       | 3/10 [00:02<00:06,  1.10Epoch/s] 40%|████      | 4/10 [00:03<00:05,  1.11Epoch/s] 50%|█████     | 5/10 [00:04<00:04,  1.12Epoch/s] 60%|██████    | 6/10 [00:05<00:03,  1.13Epoch/s] 70%|███████   | 7/10 [00:06<00:02,  1.13Epoch/s] 80%|████████  | 8/10 [00:07<00:01,  1.13Epoch/s] 90%|█████████ | 9/10 [00:08<00:00,  1.14Epoch/s]100%|██████████| 10/10 [00:08<00:00,  1.14Epoch/s]100%|██████████| 10/10 [00:08<00:00,  1.12Epoch/s]
+MSELoss: 0.0037992767752264445
+MSELoss: 0.0020332220994813627
+MSELoss: 0.0018762212197892746
+MSELoss: 0.001770930437941588
+MSELoss: 0.0016824483198734682
+MSELoss: 0.0016354204905983977
+MSELoss: 0.0015735560020215481
+MSELoss: 0.0015320146935756751
+MSELoss: 0.0014744179158460127
+MSELoss: 0.001450870657798974
+unnormalizing data...
+mae: 0.6097719073295593 | mse: 1.5734294652938843 | rse: 1.2543644905090332 | ade: 1.2793232202529907 | fde: 2.6410343647003174
+,mae,mse,rse,ade,fde
+lstm,0.6097719073295593,1.5734294652938843,1.2543644905090332,1.2793232202529907,2.6410343647003174
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[64, 64], label_ids=[0, 1, 2], learning_rate=0.0002, model='rnn2gnn', naive=False, no_cuda=False, normalize=True, num_epoch=10, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/10 [00:00<?, ?Epoch/s] 10%|█         | 1/10 [00:01<00:09,  1.09s/Epoch] 20%|██        | 2/10 [00:02<00:07,  1.00Epoch/s] 30%|███       | 3/10 [00:02<00:06,  1.03Epoch/s] 40%|████      | 4/10 [00:03<00:05,  1.04Epoch/s] 50%|█████     | 5/10 [00:04<00:04,  1.04Epoch/s] 60%|██████    | 6/10 [00:05<00:03,  1.05Epoch/s] 70%|███████   | 7/10 [00:06<00:02,  1.05Epoch/s] 80%|████████  | 8/10 [00:07<00:01,  1.05Epoch/s] 90%|█████████ | 9/10 [00:08<00:00,  1.06Epoch/s]100%|██████████| 10/10 [00:09<00:00,  1.05Epoch/s]100%|██████████| 10/10 [00:09<00:00,  1.04Epoch/s]
+MSELoss: 0.003701245360697188
+MSELoss: 0.001787550356365757
+MSELoss: 0.0017022557031749997
+MSELoss: 0.0015644350876729658
+MSELoss: 0.0015520813431293945
+MSELoss: 0.0014945994384256997
+MSELoss: 0.001468729602416494
+MSELoss: 0.0014346546394620938
+MSELoss: 0.0013846197942316868
+MSELoss: 0.0013711883987067358
+unnormalizing data...
+mae: 0.5728962421417236 | mse: 1.3857502937316895 | rse: 1.1771793365478516 | ade: 1.192628264427185 | fde: 2.50882625579834
+,mae,mse,rse,ade,fde
+rnn2gnn,0.5728962421417236,1.3857502937316895,1.1771793365478516,1.192628264427185,2.50882625579834
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[64, 64], label_ids=[0, 1, 2], learning_rate=0.0002, model='gnn2rnn', naive=True, no_cuda=False, normalize=True, num_epoch=10, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/10 [00:00<?, ?Epoch/s] 10%|█         | 1/10 [00:01<00:09,  1.09s/Epoch] 20%|██        | 2/10 [00:02<00:08,  1.01s/Epoch] 30%|███       | 3/10 [00:02<00:06,  1.02Epoch/s] 40%|████      | 4/10 [00:03<00:05,  1.03Epoch/s] 50%|█████     | 5/10 [00:04<00:04,  1.04Epoch/s] 60%|██████    | 6/10 [00:05<00:03,  1.05Epoch/s] 70%|███████   | 7/10 [00:06<00:02,  1.05Epoch/s] 80%|████████  | 8/10 [00:07<00:01,  1.06Epoch/s] 90%|█████████ | 9/10 [00:08<00:00,  1.06Epoch/s]100%|██████████| 10/10 [00:09<00:00,  1.06Epoch/s]100%|██████████| 10/10 [00:09<00:00,  1.04Epoch/s]
+MSELoss: 0.03963035875902324
+MSELoss: 0.007576158776219684
+MSELoss: 0.004581327578626782
+MSELoss: 0.0034513903744358937
+MSELoss: 0.0028556650935805893
+MSELoss: 0.002496438638560326
+MSELoss: 0.0022107897984796
+MSELoss: 0.0020356228033761026
+MSELoss: 0.001903642896360677
+MSELoss: 0.001795738123673488
+unnormalizing data...
+mae: 0.8534053564071655 | mse: 1.964437484741211 | rse: 1.401584267616272 | ade: 1.7585746049880981 | fde: 2.6486806869506836
+,mae,mse,rse,ade,fde
+gnn2rnn,0.8534053564071655,1.964437484741211,1.401584267616272,1.7585746049880981,2.6486806869506836
+unnormalizing data...
+mae: 3.3207476139068604 | mse: 43.81772232055664 | rse: 6.619495391845703 | ade: 8.398324966430664 | fde: 10.16805648803711
+,mae,mse,rse,ade,fde
+ConstantAvg,3.3207476139068604,43.81772232055664,6.619495391845703,8.398324966430664,10.16805648803711
+unnormalizing data...
+mae: 1.4846606254577637 | mse: 8.877795219421387 | rse: 2.979562997817993 | ade: 3.4928817749023438 | fde: 5.4111456871032715
+,mae,mse,rse,ade,fde
+RollingAvg,1.4846606254577637,8.877795219421387,2.979562997817993,3.4928817749023438,5.4111456871032715

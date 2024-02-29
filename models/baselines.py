@@ -39,7 +39,8 @@ class rnn2gnn(nn.Module):
 
         out, _ = self.rnn(x)
         out = self.gnn(out[-1], edge_index)
-        return out.reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+        out = out.reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+        return x[-1:, :, :3] + torch.cumsum(out, 0)
     
 
 class gnn2rnn(nn.Module):
@@ -55,8 +56,9 @@ class gnn2rnn(nn.Module):
         
         x = self.gnn(x, edge_index)
         out, _ = self.rnn(x)
-        return out[-1].reshape(N, self.precition_horizon, -1).swapdims(0, 1)
-
+        out = out[-1].reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+        return x[-1:, :, :3] + torch.cumsum(out, 0)
+    
 
 class lstmBaseline(nn.Module):
     def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128]):
@@ -71,7 +73,8 @@ class lstmBaseline(nn.Module):
         
         out, _ = self.rnn1(x)
         out, _ = self.rnn2(out)
-        return out[-1].reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+        out = out[-1].reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+        return x[-1:, :, :3] + torch.cumsum(out, 0)
 
 
 class mlpBaseline(nn.Module):
@@ -88,8 +91,9 @@ class mlpBaseline(nn.Module):
         
     def forward(self, x, **kwargs):
         T, N, d = x.shape
-        x = x.swapdims(0, 1).reshape(N, T*d)
-        return self.layers(x).reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+        out = x.swapdims(0, 1).reshape(N, T*d)
+        out = self.layers(out).reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+        return x[-1:, :, :3] + torch.cumsum(out, 0)
     
     
 class ZeroBaseline(nn.Module):

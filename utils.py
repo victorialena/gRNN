@@ -16,6 +16,10 @@ def normalize(data, data_max, data_min):
     return (data - data_min) * 2 / (data_max - data_min) - 1
 
 
+def unnormalize(data, data_max, data_min):
+    return (data + 1) * (data_max - data_min) / 2 + data_min
+
+
 def std_scaling(df):
     return (df-df.mean())/(df.std())
 

@@ -58,7 +58,9 @@ class GlstmConv(MessagePassing):
 
 class DirectMultiStepModel(nn.Module):
     def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128, 64], **kwargs):
-        super().__init__()
+        super(DirectMultiStepModel, self).__init__()
+        self.__class__.__name__ = 'grnn'
+
         self.precition_horizon = precition_horizon
 
         self.layer1 = GlstmConv(input_dim, hidden_dim[0])
@@ -71,7 +73,8 @@ class DirectMultiStepModel(nn.Module):
         out, _ = self.layer1(x, edge_index)
         out, _ = self.layer2(out.relu(), edge_index)
         out = self.linear(out[-1]).relu()
-        return out.reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+        out = out.reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+        return x[-1:, :, :3] + torch.cumsum(out, 0)
 
     def dims(self):
         return self.dimensions
