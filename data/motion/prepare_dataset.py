@@ -13,6 +13,7 @@ MAX_STEPS = 60
 NUM_NODES = 31
 NUM_FEATS = 6
 PRD_STEPS = MAX_STEPS // 4
+NUM_CLASS = 5
 
 
 
@@ -23,11 +24,6 @@ def prepare_dataset(args):
     features = np.load(DATA_PATH + 'features.npy', allow_pickle=True)
     features = features[:, ::2]
     _, T, N, d = features.shape
-
-    # Note: split into sequences of MAX_STEPS
-    # if T%MAX_STEPS > 0:
-    #     features = features[:, :-(T%MAX_STEPS)]
-    # features = features.reshape((b, -1, MAX_STEPS, N, d)).swapaxes(0,1).reshape((-1, MAX_STEPS, N, d))
     
     assert (NUM_FEATS == d) and (NUM_NODES == N) and (MAX_STEPS == T), "Loaded wrong dataset!"
     print('Dataset size:', features.shape[0])
@@ -40,6 +36,13 @@ def prepare_dataset(args):
     
     src, dst = torch.tensor(np.append(_src, _dst)), torch.tensor(np.append(_dst, _src))
     edges = torch.stack([src, dst])
+
+
+    labels = np.load(DATA_PATH + 'labels.npy')
+    assert len(np.unique(labels)) == NUM_CLASS
+    label_map = {label:i for i, label in enumerate(np.unique(labels))}
+    labels = [label_map[l] for l in labels]
+
     
     # (maybe) normalize
     x_max = features[..., 0].max().item()
@@ -58,7 +61,7 @@ def prepare_dataset(args):
         features[..., 2] = normalize(features[..., 2], z_max, z_min)
 
     # Convert to pytorch cuda tensor.
-    _input, labels = torch.Tensor(features[:, :-PRD_STEPS]), torch.Tensor(features[:, -PRD_STEPS:, :, args.label_ids])
+    _input, labels = torch.Tensor(features[:, :-PRD_STEPS]), torch.tensor(labels) #, dtype=torch.long)
     dataset = TensorDataset(_input.to(device), labels.to(device), edges.repeat(_input.shape[0], 1, 1).to(device))
 
     train_size = int(len(dataset) * 0.9)

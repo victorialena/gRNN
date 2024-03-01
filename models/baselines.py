@@ -4,7 +4,7 @@ import torch_geometric.nn as gnn
 
 import pdb
 
-from data.motion.prepare_dataset import NUM_NODES, MAX_STEPS
+from data.motion.prepare_dataset import NUM_NODES, MAX_STEPS, PRD_STEPS 
 
 RA_WINDOW = 10
 
@@ -27,73 +27,74 @@ class GNNembedding(nn.Module):
 
 
 class rnn2gnn(nn.Module):
-    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128]):
+    def __init__(self, input_dim, output_dim, hidden_dim=[64, 64]):
         super(rnn2gnn, self).__init__()
 
-        self.precition_horizon = precition_horizon
         self.rnn = nn.LSTM(input_dim, hidden_dim[0], batch_first=False, dropout=0.0)
-        self.gnn = GNNembedding(hidden_dim[0], output_dim*precition_horizon)
+        self.gnn = GNNembedding(hidden_dim[0], hidden_dim[1])
+        self.lin = nn.Linear(hidden_dim[1]*NUM_NODES, output_dim)
         
     def forward(self, x, edge_index):
-        T, N, d = x.shape
+        # T, N, d = x.shape
 
         out, _ = self.rnn(x)
         out = self.gnn(out[-1], edge_index)
-        out = out.reshape(N, self.precition_horizon, -1).swapdims(0, 1)
-        return x[-1:, :, :3] + torch.cumsum(out, 0)
+        out = self.lin(out.reshape(1, -1))
+        return out.softmax(-1)
     
 
 class gnn2rnn(nn.Module):
-    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128]):
+    def __init__(self, input_dim, output_dim, hidden_dim=[64, 64]):
         super(gnn2rnn, self).__init__()
 
-        self.precition_horizon = precition_horizon
         self.gnn = gnn.GraphSAGE(input_dim, hidden_dim[0], num_layers=1)
-        self.rnn = nn.LSTM(hidden_dim[0], output_dim*precition_horizon, batch_first=False, dropout=0.0)
+        self.rnn = nn.LSTM(hidden_dim[0], hidden_dim[1], batch_first=False, dropout=0.0)
+        self.lin = nn.Linear(hidden_dim[1]*NUM_NODES, output_dim)
         
     def forward(self, x, edge_index):
-        T, N, d = x.shape
+        # T, N, d = x.shape
         
         x = self.gnn(x, edge_index)
         out, _ = self.rnn(x)
-        out = out[-1].reshape(N, self.precition_horizon, -1).swapdims(0, 1)
-        return x[-1:, :, :3] + torch.cumsum(out, 0)
+        out = self.lin(out[-1].reshape(1, -1))
+        return out.softmax(-1)
     
 
 class lstmBaseline(nn.Module):
-    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128]):
+    def __init__(self, input_dim, output_dim, hidden_dim=[32, 32]):
         super().__init__()
         
-        self.precition_horizon = precition_horizon
         self.rnn1 = nn.LSTM(input_dim, hidden_dim[0], batch_first=False, dropout=0.0)
-        self.rnn2 = nn.LSTM(hidden_dim[0], output_dim*precition_horizon, batch_first=False, dropout=0.0)
+        self.rnn2 = nn.LSTM(hidden_dim[0], hidden_dim[1], batch_first=False, dropout=0.0)
+        self.lin1 = nn.Linear(hidden_dim[1]*NUM_NODES, output_dim)
         
     def forward(self, x, **kwargs):
-        T, N, d = x.shape
+        # T, N, d = x.shape
         
         out, _ = self.rnn1(x)
         out, _ = self.rnn2(out)
-        out = out[-1].reshape(N, self.precition_horizon, -1).swapdims(0, 1)
-        return x[-1:, :, :3] + torch.cumsum(out, 0)
+        out = self.lin1(out[-1].reshape(1, -1))
+        return out.softmax(-1)
 
 
 class mlpBaseline(nn.Module):
-    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128]):
+    def __init__(self, input_dim, output_dim, hidden_dim=[1024, 1024]):
         super(mlpBaseline, self).__init__()
 
-        self.precition_horizon = precition_horizon
+        self.embed = nn.Linear(input_dim*(MAX_STEPS-PRD_STEPS), hidden_dim[0])
         self.layers = nn.Sequential(
-            nn.Linear(input_dim*(MAX_STEPS-precition_horizon), hidden_dim[0]),
-            nn.ReLU(),
-            nn.Linear(hidden_dim[0], output_dim*precition_horizon),
-            nn.ReLU(),
+            nn.Tanh(),
+            nn.Linear(hidden_dim[0]*NUM_NODES, hidden_dim[1]),
+            nn.Tanh(),
+            nn.Linear(hidden_dim[1], output_dim),
+            nn.Softmax(-1),
         )
         
     def forward(self, x, **kwargs):
         T, N, d = x.shape
         out = x.swapdims(0, 1).reshape(N, T*d)
-        out = self.layers(out).reshape(N, self.precition_horizon, -1).swapdims(0, 1)
-        return x[-1:, :, :3] + torch.cumsum(out, 0)
+        out = self.embed(out)
+        return self.layers(out.reshape(1, -1))
     
     
 class ZeroBaseline(nn.Module):

@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 
 from torchmetrics.classification import BinaryAccuracy, BinaryRecall, BinaryPrecision
-# from torchmetrics.classification import MulticlassF1Score, MulticlassAccuracy, MulticlassRecall, MulticlassPrecision
+from torchmetrics.classification import MulticlassF1Score, MulticlassAccuracy, MulticlassRecall, MulticlassPrecision
 
 
 class RMSELoss(nn.Module):
@@ -81,10 +81,21 @@ class mREC(nn.Module):
 
     def __call__(self, pred, target, mask):
         return self.fn((pred>0).to(int).cpu(), mask.to(int).cpu())
+    
+    
+class scoreWrapper(nn.Module):
+    def __init__(self, metric):
+        super().__init__()
+        self.metric = metric
+
+    def __call__(self, pred, target):
+        self.metric.update(pred, target)
+        return self.metric.compute()
+
 
 
 class MetricSuite():
-    def __init__(self, mode:str='regression', num_classes:int=0):
+    def __init__(self, mode:str='regression', num_classes:int=0, device = None):
         self.mdict = None
         self.mode = mode
         if mode=='regression':
@@ -101,14 +112,14 @@ class MetricSuite():
                           'mmse': mMSELoss(),
                           'made': mADELoss(),
                           }
-        # elif mode=='classification':            
-        #     assert num_classes > 1
-        #     self.mdict = {'cel': nn.CrossEntropyLoss(),
-        #                   'mf1': MulticlassF1Score(num_classes),
-        #                   'acc': MulticlassAccuracy(num_classes),
-        #                   'pre': MulticlassPrecision(num_classes),
-        #                   'rec': MulticlassRecall(num_classes),
-        #                   }
+        elif mode=='classification':  
+            assert num_classes > 1
+            self.mdict = {'cel': nn.CrossEntropyLoss(),
+                          'mf1': scoreWrapper(MulticlassF1Score(num_classes)).to(device),
+                          'acc': scoreWrapper(MulticlassAccuracy(num_classes)).to(device),
+                          'pre': scoreWrapper(MulticlassPrecision(num_classes)).to(device),
+                          'rec': scoreWrapper(MulticlassRecall(num_classes)).to(device),
+                          }
             
         else:
             assert False, "Unknown metric mode."
