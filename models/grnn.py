@@ -10,15 +10,13 @@ from typing import List
 
 class GlstmConv(MessagePassing):
     def __init__(self, in_channels, out_channels, add_self_loops:bool=True):
-        super().__init__(aggr='mean') # 'add' # "Add" aggregation (Step 5).
+        super().__init__(aggr='add')
         
         self.add_self_loops = add_self_loops
         
-        # self.rnn = nn.LSTM(input_size=in_channels, hidden_size=out_channels, num_layers=1, 
-        #                     bias=False, batch_first=True, dropout=0.0)
         self.rnn = nn.GRU(input_size=in_channels, hidden_size=out_channels, num_layers=1, 
-                            bias=False, batch_first=False)
-        self.bias = nn.Parameter(torch.empty(out_channels))
+                            bias=True, batch_first=False)
+        self.bias = nn.Parameter(torch.zeros(out_channels,))
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -47,6 +45,7 @@ class GlstmConv(MessagePassing):
         # Step 4-5: Start propagating messages.
         out = self.propagate(edge_index, x=x, norm=norm)
 
+        # return x, h0
         return out + self.bias, h0
 
     def message(self, x_j, norm):
@@ -64,16 +63,14 @@ class DirectMultiStepModel(nn.Module):
         self.precition_horizon = precition_horizon
 
         self.layer1 = GlstmConv(input_dim, hidden_dim[0])
-        self.layer2 = GlstmConv(hidden_dim[0], hidden_dim[1])
-        self.linear = nn.Linear(hidden_dim[1], output_dim*precition_horizon)
+        self.layer2 = GlstmConv(hidden_dim[0], output_dim*precition_horizon)
 
     def forward(self, x, edge_index):
         T, N, d = x.shape
 
         out, _ = self.layer1(x, edge_index)
         out, _ = self.layer2(out.relu(), edge_index)
-        out = self.linear(out[-1]).relu()
-        out = out.reshape(N, self.precition_horizon, -1).swapdims(0, 1)
+        out = out[-1].reshape(N, self.precition_horizon, -1).swapdims(0, 1)
         return x[-1:, :, :3] + torch.cumsum(out, 0)
 
     def dims(self):

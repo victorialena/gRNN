@@ -26,10 +26,20 @@ class GCRUCell(nn.Module):
         self.hz = nn.Linear(hidden_size, hidden_size, bias=False)
 
         # New memory content
-        self.xn_hn = gnn.GraphSAGE(input_size+hidden_size, hidden_size, num_layers=1, act='tanh', dropout=0.0, normalize=True)
+        self.xn_hn = gnn.GraphSAGE(input_size+hidden_size, hidden_size, num_layers=1, 
+                                   act='tanh', dropout=0.0, normalize=False)
+        self.reset_parameters()
+
+
+    def reset_parameters(self):
+        self.xr.reset_parameters()
+        self.hr.reset_parameters()
+        self.xz.reset_parameters()
+        self.hz.reset_parameters()
+        self.xn_hn.reset_parameters()
+
 
     def forward(self, x, edge_index, h_prev=None):
-        # pdb.set_trace()
         if h_prev is None:
             h_prev = torch.zeros(x.size(0), self.xr.out_features, device=x.device)
 
@@ -67,12 +77,13 @@ class DirectMultiStepModel(nn.Module):
         self.output_dim = output_dim
         
         self.layer1 = GCRU(input_dim, hidden_dim[0])
-        self.layer2 = GCRU(hidden_dim[0], hidden_dim[1])
-        self.fc = nn.Linear(hidden_dim[1], output_dim*precition_horizon)
+        self.layer2 = GCRU(hidden_dim[0], output_dim*precition_horizon)
+        # self.layer2 = GCRU(hidden_dim[0], hidden_dim[1])
+        # self.fc = nn.Linear(hidden_dim[1], output_dim*precition_horizon)
         
     def forward(self, x, edge_index):
         out, _ = self.layer1(x, edge_index)
         out, _ = self.layer2(out, edge_index)
-        out = self.fc(out[-1]).relu()
-        out = out.reshape(-1, self.precition_horizon, self.output_dim).swapdims(0, 1)
+        # out = self.fc(out[-1]).relu()
+        out = out[-1].reshape(-1, self.precition_horizon, self.output_dim).swapdims(0, 1)
         return x[-1:, :, :3] + torch.cumsum(out, 0)

@@ -57,7 +57,7 @@ def train(model, data_loader, optimizer, loss_fn, num_epoch):
     return model, ep_loss
 
 
-def evaluate(model, data_loader, metrics, save=True, naive=False):
+def evaluate(model, data_loader, metrics, save=False, naive=False):
     model.eval()
     
     Y, Yhat = [], []
@@ -68,15 +68,15 @@ def evaluate(model, data_loader, metrics, save=True, naive=False):
             Y.append(y)
 
     Y, Yhat = torch.stack(Y, axis=0), torch.stack(Yhat, axis=0)
+    if args.normalize:
+        print("unnormalizing data...")
+        Y[..., 0] = unnormalize(Y[..., 0], x_max, x_min)
+        Y[..., 1] = unnormalize(Y[..., 1], y_max, y_min)
+        Y[..., 2] = unnormalize(Y[..., 2], z_max, z_min)
+        Yhat[..., 0] = unnormalize(Yhat[..., 0], x_max, x_min)
+        Yhat[..., 1] = unnormalize(Yhat[..., 1], y_max, y_min)
+        Yhat[..., 2] = unnormalize(Yhat[..., 2], z_max, z_min)
     if save:
-        if args.normalize:
-            print("unnormalizing data...")
-            Y[..., 0] = unnormalize(Y[..., 0], x_max, x_min)
-            Y[..., 1] = unnormalize(Y[..., 1], y_max, y_min)
-            Y[..., 2] = unnormalize(Y[..., 2], z_max, z_min)
-            Yhat[..., 0] = unnormalize(Yhat[..., 0], x_max, x_min)
-            Yhat[..., 1] = unnormalize(Yhat[..., 1], y_max, y_min)
-            Yhat[..., 2] = unnormalize(Yhat[..., 2], z_max, z_min)
         torch.save(torch.stack([Y, Yhat], dim=0), 'tmp/logs/'+model.__class__.__name__+'.pt')
     return [m(Yhat, Y) for m in metrics]
 
