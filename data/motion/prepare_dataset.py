@@ -23,11 +23,6 @@ def prepare_dataset(args):
     features = np.load(DATA_PATH + 'features.npy', allow_pickle=True)
     features = features[:, ::2]
     _, T, N, d = features.shape
-
-    # Note: split into sequences of MAX_STEPS
-    # if T%MAX_STEPS > 0:
-    #     features = features[:, :-(T%MAX_STEPS)]
-    # features = features.reshape((b, -1, MAX_STEPS, N, d)).swapaxes(0,1).reshape((-1, MAX_STEPS, N, d))
     
     assert (NUM_FEATS == d) and (NUM_NODES == N) and (MAX_STEPS == T), "Loaded wrong dataset!"
     print('Dataset size:', features.shape[0])
