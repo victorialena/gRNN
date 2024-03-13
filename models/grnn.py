@@ -7,6 +7,8 @@ from torch_geometric.utils import add_self_loops, degree
 
 from typing import List
 
+from data.motion.prepare_dataset import NUM_NODES
+
 
 class GlstmConv(MessagePassing):
     def __init__(self, in_channels, out_channels, add_self_loops:bool=True):
@@ -56,22 +58,21 @@ class GlstmConv(MessagePassing):
     
 
 class DirectMultiStepModel(nn.Module):
-    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128, 64], **kwargs):
+    def __init__(self, input_dim, output_dim, hidden_dim=[64, 32], **kwargs):
         super(DirectMultiStepModel, self).__init__()
         self.__class__.__name__ = 'grnn'
 
-        self.precition_horizon = precition_horizon
-
         self.layer1 = GlstmConv(input_dim, hidden_dim[0])
-        self.layer2 = GlstmConv(hidden_dim[0], output_dim*precition_horizon)
+        self.layer2 = GlstmConv(hidden_dim[0], hidden_dim[1])
+        self.lin = nn.Linear(hidden_dim[1]*NUM_NODES, output_dim)
 
     def forward(self, x, edge_index):
         T, N, d = x.shape
 
         out, _ = self.layer1(x, edge_index)
         out, _ = self.layer2(out.relu(), edge_index)
-        out = out[-1].reshape(N, self.precition_horizon, -1).swapdims(0, 1)
-        return x[-1:, :, :3] + torch.cumsum(out, 0)
+        out = self.lin(out[-1].reshape(1, -1))
+        return out.softmax(-1)
 
     def dims(self):
         return self.dimensions

@@ -1,0 +1,134 @@
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[64, 64], learning_rate=0.0002, model='grnn', no_cuda=False, normalize=True, num_epoch=20, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/20 [00:00<?, ?Epoch/s]  5%|▌         | 1/20 [00:01<00:28,  1.51s/Epoch] 10%|█         | 2/20 [00:02<00:24,  1.38s/Epoch] 15%|█▌        | 3/20 [00:04<00:23,  1.36s/Epoch] 20%|██        | 4/20 [00:05<00:21,  1.35s/Epoch] 25%|██▌       | 5/20 [00:06<00:20,  1.34s/Epoch] 30%|███       | 6/20 [00:08<00:18,  1.34s/Epoch] 35%|███▌      | 7/20 [00:09<00:17,  1.33s/Epoch] 40%|████      | 8/20 [00:10<00:15,  1.32s/Epoch] 45%|████▌     | 9/20 [00:12<00:14,  1.32s/Epoch] 50%|█████     | 10/20 [00:13<00:13,  1.32s/Epoch] 55%|█████▌    | 11/20 [00:14<00:11,  1.32s/Epoch] 60%|██████    | 12/20 [00:15<00:10,  1.31s/Epoch] 65%|██████▌   | 13/20 [00:17<00:09,  1.31s/Epoch] 70%|███████   | 14/20 [00:18<00:07,  1.31s/Epoch] 75%|███████▌  | 15/20 [00:19<00:06,  1.31s/Epoch] 80%|████████  | 16/20 [00:21<00:05,  1.31s/Epoch] 85%|████████▌ | 17/20 [00:22<00:03,  1.31s/Epoch] 90%|█████████ | 18/20 [00:23<00:02,  1.31s/Epoch] 95%|█████████▌| 19/20 [00:25<00:01,  1.31s/Epoch]100%|██████████| 20/20 [00:26<00:00,  1.31s/Epoch]100%|██████████| 20/20 [00:26<00:00,  1.32s/Epoch]
+CELoss: 1.5415712638689836
+CELoss: 1.3418637549449426
+CELoss: 1.311930236317996
+CELoss: 1.302891769386863
+CELoss: 1.2944137924546943
+CELoss: 1.289559513376953
+CELoss: 1.2876177798381276
+CELoss: 1.277906778822079
+CELoss: 1.2827807053016984
+CELoss: 1.275195223120929
+CELoss: 1.2736995913867089
+CELoss: 1.3162371749625006
+CELoss: 1.2681204813318951
+CELoss: 1.2538606085568993
+CELoss: 1.2561547807337898
+CELoss: 1.2563541400451184
+CELoss: 1.2497373724504492
+CELoss: 1.2441842806134693
+CELoss: 1.2479831788357632
+CELoss: 1.2390235375130605
+cel: 1.1433721780776978 | mf1: 0.6140188574790955 | acc: 0.6144737005233765 | pre: 0.6787996292114258 | rec: 0.6144737005233765
+,cel,mf1,acc,pre,rec
+grnn,1.1433721780776978,0.6140188574790955,0.6144737005233765,0.6787996292114258,0.6144737005233765
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[64, 64], learning_rate=0.0002, model='rgnn', no_cuda=False, normalize=True, num_epoch=20, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/20 [00:00<?, ?Epoch/s]  5%|▌         | 1/20 [00:50<16:03, 50.71s/Epoch] 10%|█         | 2/20 [01:41<15:10, 50.56s/Epoch] 15%|█▌        | 3/20 [02:31<14:14, 50.24s/Epoch] 20%|██        | 4/20 [03:20<13:17, 49.85s/Epoch] 25%|██▌       | 5/20 [04:09<12:24, 49.63s/Epoch] 30%|███       | 6/20 [04:58<11:33, 49.53s/Epoch] 35%|███▌      | 7/20 [05:48<10:42, 49.45s/Epoch] 40%|████      | 8/20 [06:37<09:52, 49.39s/Epoch] 45%|████▌     | 9/20 [07:26<09:02, 49.34s/Epoch] 50%|█████     | 10/20 [08:15<08:13, 49.31s/Epoch] 55%|█████▌    | 11/20 [09:05<07:23, 49.29s/Epoch] 60%|██████    | 12/20 [09:54<06:34, 49.26s/Epoch] 65%|██████▌   | 13/20 [10:43<05:44, 49.24s/Epoch] 70%|███████   | 14/20 [11:32<04:55, 49.24s/Epoch] 75%|███████▌  | 15/20 [12:21<04:06, 49.24s/Epoch] 80%|████████  | 16/20 [13:11<03:17, 49.26s/Epoch] 85%|████████▌ | 17/20 [14:00<02:27, 49.27s/Epoch] 90%|█████████ | 18/20 [14:49<01:38, 49.27s/Epoch] 95%|█████████▌| 19/20 [15:39<00:49, 49.27s/Epoch]100%|██████████| 20/20 [16:28<00:00, 49.26s/Epoch]100%|██████████| 20/20 [16:28<00:00, 49.42s/Epoch]
+CELoss: 1.4840782953312914
+CELoss: 1.344040754897732
+CELoss: 1.3270124716803362
+CELoss: 1.3400142678232536
+CELoss: 1.3178342574286201
+CELoss: 1.298965385570169
+CELoss: 1.3159915537060516
+CELoss: 1.299215552401431
+CELoss: 1.3047275817524437
+CELoss: 1.3065602476250922
+CELoss: 1.2997681021504395
+CELoss: 1.3032048752824898
+CELoss: 1.295740348779467
+CELoss: 1.2885814793582269
+CELoss: 1.276456927174525
+CELoss: 1.261139728907676
+CELoss: 1.277187268094228
+CELoss: 1.2709925744723232
+CELoss: 1.2449369353362811
+CELoss: 1.2549890787478728
+cel: 1.245970368385315 | mf1: 0.4190950393676758 | acc: 0.4568420946598053 | pre: 0.40539681911468506 | rec: 0.4568420946598053
+,cel,mf1,acc,pre,rec
+rgnn,1.245970368385315,0.4190950393676758,0.4568420946598053,0.40539681911468506,0.4568420946598053
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[64, 64], learning_rate=0.0002, model='mlp', no_cuda=False, normalize=True, num_epoch=10, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/10 [00:00<?, ?Epoch/s] 10%|█         | 1/10 [00:03<00:35,  3.91s/Epoch] 20%|██        | 2/10 [00:07<00:29,  3.74s/Epoch] 30%|███       | 3/10 [00:11<00:25,  3.68s/Epoch] 40%|████      | 4/10 [00:14<00:21,  3.66s/Epoch] 50%|█████     | 5/10 [00:18<00:18,  3.64s/Epoch] 60%|██████    | 6/10 [00:21<00:14,  3.63s/Epoch] 70%|███████   | 7/10 [00:25<00:10,  3.63s/Epoch] 80%|████████  | 8/10 [00:29<00:07,  3.62s/Epoch] 90%|█████████ | 9/10 [00:32<00:03,  3.62s/Epoch]100%|██████████| 10/10 [00:36<00:00,  3.62s/Epoch]100%|██████████| 10/10 [00:36<00:00,  3.65s/Epoch]
+CELoss: 1.6560254705119617
+CELoss: 1.5230650144880535
+CELoss: 1.3635663615188063
+CELoss: 1.3063057618282514
+CELoss: 1.2856338459318402
+CELoss: 1.266524514058451
+CELoss: 1.254342880524265
+CELoss: 1.2379266160326703
+CELoss: 1.2243230093659923
+CELoss: 1.2150131151568313
+cel: 1.1699557304382324 | mf1: 0.4933333396911621 | acc: 0.5694736838340759 | pre: 0.4514285922050476 | rec: 0.5694736838340759
+,cel,mf1,acc,pre,rec
+mlp,1.1699557304382324,0.4933333396911621,0.5694736838340759,0.4514285922050476,0.5694736838340759
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[64, 64], learning_rate=0.0002, model='lstm', no_cuda=False, normalize=True, num_epoch=10, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/10 [00:00<?, ?Epoch/s] 10%|█         | 1/10 [00:01<00:09,  1.00s/Epoch] 20%|██        | 2/10 [00:01<00:07,  1.09Epoch/s] 30%|███       | 3/10 [00:02<00:06,  1.12Epoch/s] 40%|████      | 4/10 [00:03<00:05,  1.13Epoch/s] 50%|█████     | 5/10 [00:04<00:04,  1.14Epoch/s] 60%|██████    | 6/10 [00:05<00:03,  1.14Epoch/s] 70%|███████   | 7/10 [00:06<00:02,  1.15Epoch/s] 80%|████████  | 8/10 [00:07<00:01,  1.15Epoch/s] 90%|█████████ | 9/10 [00:07<00:00,  1.15Epoch/s]100%|██████████| 10/10 [00:08<00:00,  1.15Epoch/s]100%|██████████| 10/10 [00:08<00:00,  1.14Epoch/s]
+CELoss: 1.5896390882929476
+CELoss: 1.5251324001972835
+CELoss: 1.4042285299524315
+CELoss: 1.3587684635997004
+CELoss: 1.3188442170341004
+CELoss: 1.3026629159119498
+CELoss: 1.3044113027696118
+CELoss: 1.305188823229809
+CELoss: 1.2930897979208162
+CELoss: 1.27316311220297
+cel: 1.194365382194519 | mf1: 0.5740510821342468 | acc: 0.5617544054985046 | pre: 0.6561853289604187 | rec: 0.5617544054985046
+,cel,mf1,acc,pre,rec
+lstm,1.194365382194519,0.5740510821342468,0.5617544054985046,0.6561853289604187,0.5617544054985046
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[64, 64], learning_rate=0.0002, model='rnn2gnn', no_cuda=False, normalize=True, num_epoch=10, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/10 [00:00<?, ?Epoch/s] 10%|█         | 1/10 [00:01<00:09,  1.07s/Epoch] 20%|██        | 2/10 [00:01<00:07,  1.02Epoch/s] 30%|███       | 3/10 [00:02<00:06,  1.05Epoch/s] 40%|████      | 4/10 [00:03<00:05,  1.06Epoch/s] 50%|█████     | 5/10 [00:04<00:04,  1.07Epoch/s] 60%|██████    | 6/10 [00:05<00:03,  1.08Epoch/s] 70%|███████   | 7/10 [00:06<00:02,  1.08Epoch/s] 80%|████████  | 8/10 [00:07<00:01,  1.08Epoch/s] 90%|█████████ | 9/10 [00:08<00:00,  1.08Epoch/s]100%|██████████| 10/10 [00:09<00:00,  1.08Epoch/s]100%|██████████| 10/10 [00:09<00:00,  1.07Epoch/s]
+CELoss: 1.5370835244376648
+CELoss: 1.3304920973904233
+CELoss: 1.3658492394988884
+CELoss: 1.3170243237580226
+CELoss: 1.3619701437384772
+CELoss: 1.375642626036348
+CELoss: 1.4310633206330299
+CELoss: 1.467942069082662
+CELoss: 1.3155379695193072
+CELoss: 1.3269076285049808
+cel: 1.187048316001892 | mf1: 0.453707218170166 | acc: 0.5189473628997803 | pre: 0.40997785329818726 | rec: 0.5189473628997803
+,cel,mf1,acc,pre,rec
+rnn2gnn,1.187048316001892,0.453707218170166,0.5189473628997803,0.40997785329818726,0.5189473628997803
+/home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/torch_geometric/typing.py:47: UserWarning: An issue occurred while importing 'pyg-lib'. Disabling its usage. Stacktrace: /home/victorialena/anaconda3/envs/rgnn/lib/python3.8/site-packages/libpyg.so: undefined symbol: _ZNK3c106SymInt13toSymNodeImplEv
+  warnings.warn(f"An issue occurred while importing 'pyg-lib'. "
+Namespace(batch_size=1, cuda=True, hidden_dim=[64, 64], learning_rate=0.0002, model='gnn2rnn', no_cuda=False, normalize=True, num_epoch=10, seed=42)
+Dataset size: 713
+normalizing data...
+  0%|          | 0/10 [00:00<?, ?Epoch/s] 10%|█         | 1/10 [00:01<00:09,  1.02s/Epoch] 20%|██        | 2/10 [00:01<00:07,  1.06Epoch/s] 30%|███       | 3/10 [00:02<00:06,  1.09Epoch/s] 40%|████      | 4/10 [00:03<00:05,  1.11Epoch/s] 50%|█████     | 5/10 [00:04<00:04,  1.12Epoch/s] 60%|██████    | 6/10 [00:05<00:03,  1.12Epoch/s] 70%|███████   | 7/10 [00:06<00:02,  1.12Epoch/s] 80%|████████  | 8/10 [00:07<00:01,  1.13Epoch/s] 90%|█████████ | 9/10 [00:08<00:00,  1.13Epoch/s]100%|██████████| 10/10 [00:08<00:00,  1.13Epoch/s]100%|██████████| 10/10 [00:08<00:00,  1.11Epoch/s]
+CELoss: 1.4605651002220357
+CELoss: 1.2940769477307146
+CELoss: 1.3090681160295996
+CELoss: 1.2744973724048334
+CELoss: 1.2724637831801
+CELoss: 1.2536623046476272
+CELoss: 1.2289024558900485
+CELoss: 1.2080096676829453
+CELoss: 1.23090833574301
+CELoss: 1.220451402403821
+cel: 1.159646987915039 | mf1: 0.5080810189247131 | acc: 0.5411403775215149 | pre: 0.48642855882644653 | rec: 0.5411403775215149
+,cel,mf1,acc,pre,rec
+gnn2rnn,1.159646987915039,0.5080810189247131,0.5411403775215149,0.48642855882644653,0.5411403775215149

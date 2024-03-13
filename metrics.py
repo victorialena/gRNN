@@ -154,3 +154,12 @@ def merge_and_print(metric_list: list, model_name: str):
 
     print_metrics(merged_dict)
     print_csv_metrics(merged_dict, model_name)
+
+
+def clean_print(metric_list: list, **kwargs):
+    merged_dict = metric_list[0].copy()
+    for metrics in metric_list[1:]:
+        merged_dict.update(metrics)
+
+    res = [str(v.item()) for _, v in merged_dict.items()]
+    print(",".join(kwargs.values())+","+",".join(res))

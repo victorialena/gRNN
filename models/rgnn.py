@@ -5,6 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch_geometric.nn as gnn
 
+from data.motion.prepare_dataset import NUM_NODES
+
 
 class GCRUCell(nn.Module):
     """
@@ -69,21 +71,16 @@ class GCRU(nn.Module):
 
 
 class DirectMultiStepModel(nn.Module):
-    def __init__(self, input_dim, output_dim, precition_horizon, hidden_dim=[128, 64]):
+    def __init__(self, input_dim, output_dim, hidden_dim=[64, 32]):
         super(DirectMultiStepModel, self).__init__()
         self.__class__.__name__ = 'rgnn'
         
-        self.precition_horizon = precition_horizon
-        self.output_dim = output_dim
-        
         self.layer1 = GCRU(input_dim, hidden_dim[0])
-        self.layer2 = GCRU(hidden_dim[0], output_dim*precition_horizon)
-        # self.layer2 = GCRU(hidden_dim[0], hidden_dim[1])
-        # self.fc = nn.Linear(hidden_dim[1], output_dim*precition_horizon)
+        self.layer2 = GCRU(hidden_dim[0], hidden_dim[1])
+        self.lin = nn.Linear(hidden_dim[1]*NUM_NODES, output_dim)
         
     def forward(self, x, edge_index):
         out, _ = self.layer1(x, edge_index)
         out, _ = self.layer2(out, edge_index)
-        # out = self.fc(out[-1]).relu()
-        out = out[-1].reshape(-1, self.precition_horizon, self.output_dim).swapdims(0, 1)
-        return x[-1:, :, :3] + torch.cumsum(out, 0)
+        out = self.lin(out[-1].reshape(1, -1))
+        return out.softmax(-1)

@@ -9,11 +9,14 @@ from torch.optim import Adam
 from tqdm import trange
 
 from data.motion.prepare_dataset import prepare_dataset, NUM_CLASS
-from metrics import MetricSuite, merge_and_print
+from metrics import MetricSuite, merge_and_print, clean_print
 from utils import seedall, which_model, unnormalize
 
 
 from models.baselines import RollingAvg, ConstantAvg
+
+import warnings
+warnings.filterwarnings("ignore")
 
 
 parser = argparse.ArgumentParser()
@@ -30,14 +33,15 @@ parser.add_argument('--hidden_dim', nargs='+', type=int, default=[64, 64], help=
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 device = torch.device("cuda" if args.cuda else "cpu")
-print(args)
+# print(args)
 
 
 def train(model, data_loader, optimizer, loss_fn, num_epoch):
     model.train()
     
     ep_loss = []
-    for _ in trange(num_epoch, unit="Epoch"):
+    # for _ in trange(num_epoch, unit="Epoch"):
+    for _ in range(num_epoch):
         losses = []
         for x, y, edges in data_loader:
             x, edges = x.squeeze(0), edges.squeeze(0)
@@ -49,7 +53,7 @@ def train(model, data_loader, optimizer, loss_fn, num_epoch):
             optimizer.step()
             
             losses.append(loss.item())
-        print('CELoss:', np.mean(losses))
+        # print('CELoss:', np.mean(losses))
         
         ep_loss.append(np.mean(losses))
     return model, ep_loss
@@ -79,7 +83,7 @@ in_channels, out_channels = NUM_FEATS, NUM_CLASS
 
 seedall()
 DirectMultiStepModel = which_model(args.model)
-model = DirectMultiStepModel(in_channels, out_channels).to(device) # , hidden_dim=args.hidden_dim).to(device)
+model = DirectMultiStepModel(in_channels, out_channels).to(device)
 optimizer = Adam(model.parameters(), lr=args.learning_rate)
 
 loss_fn = nn.CrossEntropyLoss()
@@ -88,4 +92,5 @@ metrics = MetricSuite('classification', num_classes=NUM_CLASS, device=device)
 model, loss = train(model, train_loader, optimizer, loss_fn, args.num_epoch)
 
 direct_metrics = evaluate(model, test_loader, [metrics])
-merge_and_print(direct_metrics, args.model)
+# merge_and_print(direct_metrics, model_name=args.model)
+clean_print(direct_metrics, model_name=args.model, seed=str(args.seed))
