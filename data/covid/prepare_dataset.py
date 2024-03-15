@@ -51,7 +51,7 @@ def prepare_dataset(args):
     val_size = 0
     test_size = len(dataset) - train_size - val_size
 
-    seedall()
+    seedall(args.seed)
     train_dataset, _, test_dataset = random_split(dataset, [train_size, val_size, test_size])
 
     # Parameters

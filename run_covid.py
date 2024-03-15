@@ -12,12 +12,6 @@ from data.covid.prepare_dataset import prepare_dataset, PRD_STEPS
 from metrics import MetricSuite, merge_and_print
 from utils import seedall, which_model
 
-# from models.rgnn import DirectMultiStepModel
-# from models.grnn import DirectMultiStepModel
-# from models.baselines import lstmBaseline as DirectMultiStepModel
-# from models.baselines import mlpBaseline as DirectMultiStepModel
-# from models.baselines import rnn2gnn as DirectMultiStepModel
-# from models.baselines import gnn2rnn as DirectMultiStepModel
 from models.baselines import ZeroBaseline, RollingAvg
 
 
@@ -90,7 +84,7 @@ train_loader, test_loader, scaling, (_, NUM_NODES, MAX_STEPS, NUM_FEATS) = prepa
 
 in_channels, out_channels = NUM_FEATS, len(args.label_ids)
 
-seedall()
+seedall(args.seed)
 DirectMultiStepModel = which_model(args.model)
 model = DirectMultiStepModel(in_channels, out_channels, PRD_STEPS, args.hidden_dim).to(device)
 optimizer = Adam(model.parameters(), lr=args.learning_rate)
